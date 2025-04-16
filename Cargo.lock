@@ -3841,7 +3841,6 @@ dependencies = [
  "common-pprof",
  "common-telemetry",
  "lazy_static",
- "linkportalbackend-forwarder",
  "linkportalbackend-server",
  "linkportalbackend-types",
  "linkportalbackend-updater",
@@ -3860,44 +3859,6 @@ dependencies = [
  "tower-cookies",
  "tower-http 0.5.2",
  "tracing",
-]
-
-[[package]]
-name = "linkportalbackend-forwarder"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum 0.8.3",
- "chrono",
- "clap 4.5.34",
- "common-telemetry",
- "config",
- "dotenv",
- "hyper 1.6.0",
- "langchain-rust",
- "lazy_static",
- "linkportalbackend-server",
- "linkportalbackend-types",
- "linkportalbackend-utils",
- "modsecurity",
- "moka",
- "openai",
- "pgvector",
- "redis",
- "regex",
- "reqwest 0.12.15",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror 2.0.12",
- "tokio",
- "tokio-cron-scheduler",
- "tower 0.5.2",
- "tracing",
- "tracing-subscriber",
- "url",
- "validator",
 ]
 
 [[package]]

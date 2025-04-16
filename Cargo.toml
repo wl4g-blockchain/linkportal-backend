@@ -10,7 +10,6 @@ members = [
     "src/cmd",
     "src/server",
     "src/updater",
-    "src/forwarder",
     "src/types",
     "src/utils",
 ]
@@ -45,7 +44,6 @@ common-telemetry = { path = "src/common/telemetry" }
 linkportalbackend-cmd = { path = "src/cmd" }
 linkportalbackend-server = { path = "src/server" }
 linkportalbackend-updater = { path = "src/updater" }
-linkportalbackend-forwarder = { path = "src/forwarder" }
 linkportalbackend-types = { path = "src/types" }
 linkportalbackend-utils = { path = "src/utils" }
 

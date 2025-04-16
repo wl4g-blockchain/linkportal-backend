@@ -20,14 +20,8 @@
 
 use super::server::WebServer;
 use crate::cmd::management::ManagementServer;
-use axum::body::Body;
-use axum::extract::{Request, State};
-use axum::http::Response;
-use axum::middleware::Next;
 use clap::Command;
-use linkportalbackend_forwarder::forwarder_base::LinkPortalBackendForwarderManager;
 use linkportalbackend_server::config::config::AppConfig;
-use linkportalbackend_server::context::state::LinkPortalBackendState;
 use linkportalbackend_server::llm::handler::llm_base::LLMManager;
 use linkportalbackend_server::{
     config::config::{self, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION},
@@ -36,8 +30,6 @@ use linkportalbackend_server::{
 use linkportalbackend_updater::updater_base::LinkPortalBackendUpdaterManager;
 use linkportalbackend_utils::panics::PanicHelper;
 use std::env;
-use std::future::Future;
-use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::oneshot;
 
@@ -77,18 +69,7 @@ impl StandaloneServer {
     async fn start(config: &Arc<AppConfig>, verbose: bool) {
         LLMManager::init().await;
         LinkPortalBackendUpdaterManager::init().await;
-        LinkPortalBackendForwarderManager::init().await;
-        WebServer::start(config, verbose, None, Some(Self::wrapped_linkportalbackend_middleware)).await;
-    }
-
-    fn wrapped_linkportalbackend_middleware(
-        state: State<LinkPortalBackendState>,
-        request: Request<Body>,
-        next: Next,
-    ) -> Pin<Box<dyn Future<Output = Response<Body>> + Send>> {
-        Box::pin(LinkPortalBackendForwarderManager::linkportalbackend_middleware(
-            state, request, next,
-        ))
+        WebServer::start(config, verbose, None, None).await;
     }
 
     fn print_banner(config: Arc<AppConfig>, verbose: bool) {

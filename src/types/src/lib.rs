@@ -20,7 +20,6 @@
 
 pub mod api_v1;
 pub mod auth;
-pub mod forwarder;
 pub mod knowledge;
 pub mod user;
 

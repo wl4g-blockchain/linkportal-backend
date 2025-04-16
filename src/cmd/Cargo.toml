@@ -18,7 +18,6 @@ common-telemetry = { workspace = true, features = [
 ] }
 linkportalbackend-server.workspace = true
 linkportalbackend-updater.workspace = true
-linkportalbackend-forwarder.workspace = true
 linkportalbackend-types.workspace = true
 linkportalbackend-utils.workspace = true
 

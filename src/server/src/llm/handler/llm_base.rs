@@ -20,8 +20,8 @@
 
 use crate::{config::config, llm::handler::llm_langchain::LangchainLLMHandler};
 use anyhow::Error;
-use linkportalbackend_types::knowledge::KnowledgeUploadInfo;
 use lazy_static::lazy_static;
+use linkportalbackend_types::knowledge::KnowledgeUploadInfo;
 use std::{
     collections::HashMap,
     fs::File,
@@ -93,7 +93,7 @@ impl LLMManager {
         if let Some(implementation) = this.implementations.get(&name) {
             Ok(implementation.to_owned())
         } else {
-            let errmsg = format!("Could not obtain registered Forwarder '{}'.", name);
+            let errmsg = format!("Could not obtain registered LLM handler '{}'.", name);
             return Err(Error::msg(errmsg));
         }
     }

@@ -18,14 +18,12 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-pub mod forwarder;
 pub mod management;
 pub mod server;
 pub mod standalone;
 pub mod updater;
 
 use clap::{Arg, ArgMatches, Command};
-use forwarder::LinkPortalBackendForwarderServer;
 use linkportalbackend_server::config::config;
 use server::WebServer;
 use standalone::StandaloneServer;
@@ -62,14 +60,6 @@ pub fn register_subcommand_handles() -> &'static BTreeMap<&'static str, (Subcomm
                 // Type inference error, forced conversion need.
                 LinkPortalBackendUpdaterServer::build as SubcommandBuildFn,
                 LinkPortalBackendUpdaterServer::run as SubcommandHandleFn,
-            ),
-        );
-        map.insert(
-            LinkPortalBackendForwarderServer::COMMAND_NAME,
-            (
-                // Type inference error, forced conversion need.
-                LinkPortalBackendForwarderServer::build as SubcommandBuildFn,
-                LinkPortalBackendForwarderServer::run as SubcommandHandleFn,
             ),
         );
         map
