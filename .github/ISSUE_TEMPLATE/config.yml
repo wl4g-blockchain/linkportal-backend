@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: LinkPortalBackend Community Slack
+    url: https://wl4g.com/slack
+    about: Get free help from the LinkPortalBackend community
+  - name: LinkPortalBackend Community Discussion
+    url: https://github.com/wl4g-blockchain/linkportalbackend/discussions
+    about: Get free help from the LinkPortalBackend community

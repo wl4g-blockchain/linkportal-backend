@@ -1,0 +1,107 @@
+x-shared-env: &shared-api-worker-env
+  SWAGGER__ENABLED: ${SWAGGER_ENABLED:-true}
+  LOGGING__MODE: ${LOGGING_MODE:-JSON}
+  LOGGING__LEVEL: ${LOGGING_LEVEL:-DEBUG}
+  CACHE__PROVIDER: ${CACHE_PROVIDER:-Redis}
+  CACHE__REDIS__NODES: ${REDIS_NODES:-redis://127.0.0.1:6379}
+  CACHE__REDIS__PASSWORD: ${REDIS_PASSWORD:-}
+  DATABASE__SYSTEMDB__HOST: ${POSTGRES_HOST:-pgvector}
+  DATABASE__SYSTEMDB__PORT: ${POSTGRES_PORT:-5432}
+  DATABASE__SYSTEMDB__USER: ${POSTGRES_USER:-postgres}
+  DATABASE__SYSTEMDB__PASSWORD: ${POSTGRES_PASSWORD:-changeit}
+  DATABASE__SYSTEMDB__DATABASE: ${POSTGRES_DATABASE:-linkportalbackend}
+  DATABASE__SYSTEMDB__MIN_CONNECTION: ${POSTGRES_MIN_CONNECTION:-1}
+  DATABASE__SYSTEMDB__MAX_CONNECTION: ${POSTGRES_MAX_CONNECTION:-10}
+  DATABASE__PGVECTOR__HOST: ${POSTGRES_HOST:-pgvector}
+  DATABASE__PGVECTOR__PORT: ${POSTGRES_PORT:-5432}
+  DATABASE__PGVECTOR__USER: ${POSTGRES_USER:-postgres}
+  DATABASE__PGVECTOR__PASSWORD: ${POSTGRES_PASSWORD:-changeit}
+  DATABASE__PGVECTOR__DATABASE: ${POSTGRES_DATABASE:-linkportalbackend}
+  DATABASE__PGVECTOR__MIN_CONNECTION: ${POSTGRES_MIN_CONNECTION:-1}
+  DATABASE__PGVECTOR__MAX_CONNECTION: ${POSTGRES_MAX_CONNECTION:-10}
+  LINKPORTAL_BACKEND__LLM__EMBEDDING__API_KEY: ${LINKPORTAL_BACKEND_LLM_EMBEDDING_API_KEY}
+  LINKPORTAL_BACKEND__LLM__EMBEDDING__MODEL: ${LINKPORTAL_BACKEND_LLM_EMBEDDING_MODEL}
+  LINKPORTAL_BACKEND__LLM__GENERATE__API_KEY: ${LINKPORTAL_BACKEND_LLM_GENERATE_API_KEY}
+  LINKPORTAL_BACKEND__LLM__GENERATE__MODEL: ${LINKPORTAL_BACKEND_LLM_GENERATE_MODEL}
+  LINKPORTAL_BACKEND__FORWARDER__MAX_BODY_BYTES: ${LINKPORTAL_BACKEND_FORWADER_MAX_BODY_BYTES:-65535}
+  LINKPORTAL_BACKEND__FORWARDER__CONNECT_TIMEOUT: ${LINKPORTAL_BACKEND_FORWADER_CONNECT_TIMEOUT:-5}
+  LINKPORTAL_BACKEND__FORWARDER__READ_TIMEOUT: ${LINKPORTAL_BACKEND_FORWADER_READ_TIMEOUT:-10}
+  LINKPORTAL_BACKEND__FORWARDER__TOTAL_TIMEOUT: ${LINKPORTAL_BACKEND_FORWADER_TOTAL_TIMEOUT:-15}
+
+services:
+  systemdb:
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/pgvector_pgvector:pg16
+    profiles:
+      - pgvector
+    restart: unless-stopped
+    environment:
+      PGUSER: ${DATABASE__SYSTEMDB__USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE__SYSTEMDB__PASSWORD:-changeit}
+      POSTGRES_DB: ${DATABASE__SYSTEMDB__DATABASE:-linkportalbackend_sysdb}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /Volumes/disk1/linkportalbackend/systemdb/data:/var/lib/postgresql/data
+    networks:
+      - linkportalbackend
+    healthcheck:
+      test: [ 'CMD', 'pg_isready' ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  pgvector:
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/pgvector_pgvector:pg16
+    profiles:
+      - pgvector
+    restart: unless-stopped
+    environment:
+      PGUSER: ${DATABASE__PGVECTOR__USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE__PGVECTOR__PASSWORD:-changeit}
+      POSTGRES_DB: ${DATABASE__PGVECTOR__DATABASE:-linkportalbackend_vecdb}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /Volumes/disk1/linkportalbackend/vectordb/data:/var/lib/postgresql/data
+    networks:
+      - linkportalbackend
+    healthcheck:
+      test: [ 'CMD', 'pg_isready' ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  serve:
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/linkportalbackend:latest
+    restart: unless-stopped
+    command: serve
+    ports:
+      - 9000:9000
+    environment:
+      <<: *x-shared-env
+    depends_on:
+      - pgvector
+      - redis
+    volumes:
+      # Mount the storage directory to the container, for example system tmp and storing user files.
+      - /Volumes/disk1/linkportalbackend/storage:/var/lib/linkportalbackend/storage
+    networks:
+      - linkportalbackend
+
+  updater:
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/linkportalbackend:latest
+    restart: unless-stopped
+    command: updater
+    environment:
+      <<: *x-shared-env
+    depends_on:
+      - pgvector
+      - redis
+    volumes:
+      # Mount the storage directory to the container, for example system tmp and storing user files.
+      - /Volumes/disk1/linkportalbackend/storage:/var/lib/linkportalbackend/storage
+    networks:
+      - linkportalbackend
+
+networks:
+  linkportalbackend:
+    driver: bridge
+    internal: true
