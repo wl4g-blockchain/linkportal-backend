@@ -19,21 +19,45 @@
 // This includes modifications and derived works.
 
 // use openai::chat::{ChatCompletion, ChatCompletionMessage, ChatCompletionMessageRole};
-use super::updater_base::{ILinkPortalUpdater, LinkPortalAccessEvent};
+use super::updater_base::ILinkPortalUpdater;
 use async_trait::async_trait;
 use common_telemetry::info;
 use linkportal_server::{config::config::UpdaterProperties, llm::handler::llm_base::LLMManager};
-use std::sync::Arc;
+use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, sync::Arc};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LinkPortalEthereumEvent {
+    // // Request information.
+    // pub method: String,
+    // pub scheme: Option<String>,
+    // pub host: Option<String>,
+    // pub port: Option<u16>,
+    // pub headers: Option<HashMap<String, Option<String>>>,
+    // pub path: String,
+    // pub query: Option<String>,
+    // pub body: Option<String>,
+    // // Additional request information.
+    // pub req_id: Option<String>,
+    // pub client_ip: Option<String>,
+    // pub start_time: u64,
+    // // Response information.
+    // pub resp_status_code: Option<i32>,
+    // pub resp_headers: Option<HashMap<String, Option<String>>>,
+    // pub resp_body: Option<String>,
+    // // Additional response information.
+    // pub duration: Option<u64>,
+}
+
 #[derive(Clone)]
-pub struct SimpleLLMUpdater {
+pub struct EthereumEventUpdater {
     config: UpdaterProperties,
     scheduler: Arc<JobScheduler>,
 }
 
-impl SimpleLLMUpdater {
-    pub const KIND: &'static str = "SIMPLE_LLM";
+impl EthereumEventUpdater {
+    pub const KIND: &'static str = "ETH_EVENT";
 
     pub async fn new(config: &UpdaterProperties) -> Arc<Self> {
         // Create the this updater handler instance.
@@ -44,7 +68,7 @@ impl SimpleLLMUpdater {
     }
 
     pub(super) async fn update(&self) {
-        info!("Updating ModSec Rules ...");
+        info!("Updating Ethereum Events ...");
 
         // TODO: Unified create the llm handler instance with 'server/src/context/state.rs#llm_handler'
         let llm_handler = LLMManager::get_default_implementation();
@@ -63,13 +87,13 @@ impl SimpleLLMUpdater {
     }
 
     #[allow(unused)]
-    async fn fetch_events(&self, page_index: i64, page_size: i64) -> Vec<LinkPortalAccessEvent> {
+    async fn fetch_events(&self, page_index: i64, page_size: i64) -> Vec<LinkPortalEthereumEvent> {
         todo!()
     }
 }
 
 #[async_trait]
-impl ILinkPortalUpdater for SimpleLLMUpdater {
+impl ILinkPortalUpdater for EthereumEventUpdater {
     // start async thread job to re-scaning near real-time recorded access events.
     async fn init(&self) {
         let this = self.clone();

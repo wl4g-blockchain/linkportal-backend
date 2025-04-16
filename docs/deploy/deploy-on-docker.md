@@ -1,6 +1,6 @@
-# Build and Deploy on Docker
+# Deployment on Docker
 
-## Building the image
+## Build the image
 
 - Build the execuable and initdb All images.
 

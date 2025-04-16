@@ -158,8 +158,8 @@ vecdb:
 services:
   # Chain transaction event data Analysis updater based LLM.
   updaters:
-    - name: "defaultUpdater"
-      kind: "SIMPLE_LLM"
+    - name: "defaultEthEventUpdater"
+      kind: "ETH_EVENT"
       enabled: true
       cron: "0 * * * * *"
       channel-size: 200
