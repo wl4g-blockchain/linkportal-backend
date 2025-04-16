@@ -608,7 +608,7 @@ impl Default for SwaggerProperties {
             // version: "1.0.0".to_string(),
             // license_name: "Apache 2.0".to_string(),
             // license_url: "https://www.apache.org/licenses/LICENSE-2.0".to_string(),
-            // contact_name: "LinkPortalBackend API".to_string(),
+            // contact_name: "LinkPortal API".to_string(),
             // contact_email: "jameswong1376@gmail.com".to_string(),
             // contact_url: "https://github.com/wl4g/my-webnote".to_string(),
             // terms_of_service: "api/terms-of-service".to_string(),
@@ -810,7 +810,7 @@ impl Default for ServicesProperties {
     fn default() -> Self {
         ServicesProperties {
             blocked_status_code: None,
-            blocked_header_name: String::from("X-LinkPortalBackend-Blocked"),
+            blocked_header_name: String::from("X-LinkPortal-Blocked"),
             allow_addition_modsec_info: true,
             static_rules: vec![],
             llm: LlmProperties::default(),

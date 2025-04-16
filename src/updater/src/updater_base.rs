@@ -31,32 +31,31 @@ use std::{
 };
 
 #[async_trait]
-pub trait ILinkPortalBackendUpdater: Send + Sync {
+pub trait ILinkPortalUpdater: Send + Sync {
     async fn init(&self);
 }
 
 lazy_static! {
-    static ref SINGLE_INSTANCE: RwLock<LinkPortalBackendUpdaterManager> =
-        RwLock::new(LinkPortalBackendUpdaterManager::new());
+    static ref SINGLE_INSTANCE: RwLock<LinkPortalUpdaterManager> = RwLock::new(LinkPortalUpdaterManager::new());
 }
 
-pub struct LinkPortalBackendUpdaterManager {
-    pub implementations: HashMap<String, Arc<dyn ILinkPortalBackendUpdater + Send + Sync>>,
+pub struct LinkPortalUpdaterManager {
+    pub implementations: HashMap<String, Arc<dyn ILinkPortalUpdater + Send + Sync>>,
 }
 
-impl LinkPortalBackendUpdaterManager {
+impl LinkPortalUpdaterManager {
     fn new() -> Self {
-        LinkPortalBackendUpdaterManager {
+        LinkPortalUpdaterManager {
             implementations: HashMap::new(),
         }
     }
 
-    pub fn get() -> &'static RwLock<LinkPortalBackendUpdaterManager> {
+    pub fn get() -> &'static RwLock<LinkPortalUpdaterManager> {
         &SINGLE_INSTANCE
     }
 
     pub async fn init() {
-        info!("Register All LinkPortalBackend updaters ...");
+        info!("Register All LinkPortal updaters ...");
 
         for config in &config::get_config().services.updaters {
             if !config.enabled {
@@ -71,16 +70,16 @@ impl LinkPortalBackendUpdaterManager {
                     .register(config.kind.to_owned(), SimpleLLMUpdater::new(config).await)
                 {
                     Ok(registered) => {
-                        info!("Initializing LinkPortalBackend Updater ...");
+                        info!("Initializing LinkPortal Updater ...");
                         let _ = registered.init().await;
                     }
-                    Err(e) => panic!("Failed to register LinkPortalBackend Updater: {}", e),
+                    Err(e) => panic!("Failed to register LinkPortal Updater: {}", e),
                 }
             }
         }
     }
 
-    fn register<T: ILinkPortalBackendUpdater + Send + Sync + 'static>(
+    fn register<T: ILinkPortalUpdater + Send + Sync + 'static>(
         &mut self,
         name: String,
         handler: Arc<T>,
@@ -93,9 +92,9 @@ impl LinkPortalBackendUpdaterManager {
         Ok(handler)
     }
 
-    pub async fn get_implementation(name: String) -> Result<Arc<dyn ILinkPortalBackendUpdater + Send + Sync>, Error> {
+    pub async fn get_implementation(name: String) -> Result<Arc<dyn ILinkPortalUpdater + Send + Sync>, Error> {
         // If the read lock is poisoned, the program will panic.
-        let this = LinkPortalBackendUpdaterManager::get().read().unwrap();
+        let this = LinkPortalUpdaterManager::get().read().unwrap();
         if let Some(implementation) = this.implementations.get(&name) {
             Ok(implementation.to_owned())
         } else {
@@ -106,7 +105,7 @@ impl LinkPortalBackendUpdaterManager {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct LinkPortalBackendAccessEvent {
+pub struct LinkPortalAccessEvent {
     // Request information.
     pub method: String,
     pub scheme: Option<String>,

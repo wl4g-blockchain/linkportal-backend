@@ -28,7 +28,7 @@ use linkportal_server::config::config;
 use server::WebServer;
 use standalone::StandaloneServer;
 use std::{collections::BTreeMap, sync::OnceLock};
-use updater::LinkPortalBackendUpdaterServer;
+use updater::LinkPortalUpdaterServer;
 
 type SubcommandBuildFn = fn() -> Command;
 type SubcommandHandleFn = fn(&ArgMatches, bool) -> ();
@@ -55,11 +55,11 @@ pub fn register_subcommand_handles() -> &'static BTreeMap<&'static str, (Subcomm
             ),
         );
         map.insert(
-            LinkPortalBackendUpdaterServer::COMMAND_NAME,
+            LinkPortalUpdaterServer::COMMAND_NAME,
             (
                 // Type inference error, forced conversion need.
-                LinkPortalBackendUpdaterServer::build as SubcommandBuildFn,
-                LinkPortalBackendUpdaterServer::run as SubcommandHandleFn,
+                LinkPortalUpdaterServer::build as SubcommandBuildFn,
+                LinkPortalUpdaterServer::run as SubcommandHandleFn,
             ),
         );
         map
@@ -67,7 +67,7 @@ pub fn register_subcommand_handles() -> &'static BTreeMap<&'static str, (Subcomm
 }
 
 pub fn execute_commands_app() -> () {
-    let mut app = Command::new("LinkPortalBackend Rust Serve")
+    let mut app = Command::new("LinkPortal Rust Serve")
         .version(linkportal_server::config::config::VERSION.as_str())
         .author("James Wong")
         .about(

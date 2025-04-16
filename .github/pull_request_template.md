@@ -1,4 +1,4 @@
-# I hereby agree to the terms of the [LinkPortalBackend CLA](https://github.com/wl4g-blockchain/linkportal-backend/.github/blob/master/CLA.md)
+# I hereby agree to the terms of the [LinkPortal CLA](https://github.com/wl4g-blockchain/linkportal-backend/.github/blob/master/CLA.md)
 
 ## Refer to a related PR or issue link (optional)
 

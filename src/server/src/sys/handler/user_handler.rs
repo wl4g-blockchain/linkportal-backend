@@ -26,7 +26,7 @@ use common_audit_log::audit_log;
 use linkportal_types::user::{DeleteUserRequest, QueryUserRequest, SaveUserRequest, SaveUserRequestWith, User};
 use linkportal_types::{BaseBean, PageRequest, PageResponse};
 
-use crate::context::state::LinkPortalBackendState;
+use crate::context::state::LinkPortalState;
 
 #[async_trait]
 pub trait IUserHandler: Send {
@@ -63,11 +63,11 @@ pub trait IUserHandler: Send {
 }
 
 pub struct UserHandler<'a> {
-    state: &'a LinkPortalBackendState,
+    state: &'a LinkPortalState,
 }
 
 impl<'a> UserHandler<'a> {
-    pub fn new(state: &'a LinkPortalBackendState) -> Self {
+    pub fn new(state: &'a LinkPortalState) -> Self {
         Self { state }
     }
 }

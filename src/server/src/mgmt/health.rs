@@ -19,7 +19,7 @@
 // This includes modifications and derived works.
 
 use crate::config::config::{AppDBType, CacheProvider};
-use crate::context::state::LinkPortalBackendState;
+use crate::context::state::LinkPortalState;
 use async_trait::async_trait;
 use axum::{extract::State, response::IntoResponse, routing::get, Router};
 use hyper::StatusCode;
@@ -35,7 +35,7 @@ pub(crate) const HEALTHZ_URI: &str = "/_/healthz";
 
 #[async_trait]
 pub(crate) trait HealthChecker: Send + Sync {
-    async fn check(&self, state: &LinkPortalBackendState) -> HealthCheckResult;
+    async fn check(&self, state: &LinkPortalState) -> HealthCheckResult;
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -52,7 +52,7 @@ impl SQLiteChecker {
         SQLiteChecker {}
     }
 
-    async fn is_sqlite_connected(&self, state: &LinkPortalBackendState) -> bool {
+    async fn is_sqlite_connected(&self, state: &LinkPortalState) -> bool {
         match &state.config.appdb.db_type {
             AppDBType::SQLITE => {
                 let repo = state.user_repo.lock().await;
@@ -75,7 +75,7 @@ impl SQLiteChecker {
 
 #[async_trait]
 impl HealthChecker for SQLiteChecker {
-    async fn check(&self, state: &LinkPortalBackendState) -> HealthCheckResult {
+    async fn check(&self, state: &LinkPortalState) -> HealthCheckResult {
         let status = if self.is_sqlite_connected(state).await {
             "UP"
         } else {
@@ -96,7 +96,7 @@ impl MongoChecker {
         MongoChecker {}
     }
 
-    async fn is_mongo_connected(&self, state: &LinkPortalBackendState) -> bool {
+    async fn is_mongo_connected(&self, state: &LinkPortalState) -> bool {
         match &state.config.appdb.db_type {
             AppDBType::MONGODB => {
                 let repo = state.user_repo.lock().await;
@@ -119,7 +119,7 @@ impl MongoChecker {
 
 #[async_trait]
 impl HealthChecker for MongoChecker {
-    async fn check(&self, state: &LinkPortalBackendState) -> HealthCheckResult {
+    async fn check(&self, state: &LinkPortalState) -> HealthCheckResult {
         let status = if self.is_mongo_connected(state).await {
             "UP"
         } else {
@@ -140,7 +140,7 @@ impl RedisClusterChecker {
         RedisClusterChecker {}
     }
 
-    async fn is_redis_cluster_connected(&self, state: &LinkPortalBackendState) -> bool {
+    async fn is_redis_cluster_connected(&self, state: &LinkPortalState) -> bool {
         match &state.config.cache.provider {
             CacheProvider::REDIS => {
                 let cache = state.string_cache.get(&state.config);
@@ -159,7 +159,7 @@ impl RedisClusterChecker {
 
 #[async_trait]
 impl HealthChecker for RedisClusterChecker {
-    async fn check(&self, state: &LinkPortalBackendState) -> HealthCheckResult {
+    async fn check(&self, state: &LinkPortalState) -> HealthCheckResult {
         let status = if self.is_redis_cluster_connected(state).await {
             "UP"
         } else {
@@ -172,14 +172,14 @@ impl HealthChecker for RedisClusterChecker {
     }
 }
 
-pub fn init() -> Router<LinkPortalBackendState> {
+pub fn init() -> Router<LinkPortalState> {
     Router::new().route(HEALTHZ_URI, get(handle_healthz))
     // .route(STARTUP_HEALTHZ_URI, get(handle_healthz_startup))
     // .route(READNESS_HEALTHZ_URI, get(handle_healthz_readness))
     // .route(READNESS_HEALTHZ_URI, get(handle_healthz_liveness))
 }
 
-async fn handle_healthz(State(state): State<LinkPortalBackendState>) -> impl IntoResponse {
+async fn handle_healthz(State(state): State<LinkPortalState>) -> impl IntoResponse {
     let mut result = HealthCheckResult {
         status: "UP".to_string(),
         details: HashMap::new(),

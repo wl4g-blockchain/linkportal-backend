@@ -20,7 +20,7 @@
 
 use super::user_handler::{IUserHandler, UserHandler};
 use crate::util::auths;
-use crate::{config::config::AppConfig, context::state::LinkPortalBackendState};
+use crate::{config::config::AppConfig, context::state::LinkPortalState};
 use anyhow::{anyhow, Error, Ok};
 use async_trait::async_trait;
 use chrono::Utc;
@@ -89,11 +89,11 @@ pub trait IAuthHandler: Send {
 }
 
 pub struct AuthHandler<'a> {
-    state: &'a LinkPortalBackendState,
+    state: &'a LinkPortalState,
 }
 
 impl<'a> AuthHandler<'a> {
-    pub fn new(state: &'a LinkPortalBackendState) -> Self {
+    pub fn new(state: &'a LinkPortalState) -> Self {
         Self { state }
     }
 }

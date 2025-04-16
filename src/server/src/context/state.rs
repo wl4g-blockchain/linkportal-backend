@@ -36,7 +36,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(Clone)]
-pub struct LinkPortalBackendState {
+pub struct LinkPortalState {
     pub config: Arc<AppConfig>,
     // The Basic operators.
     pub string_cache: Arc<CacheContainer<String>>,
@@ -55,7 +55,7 @@ pub struct LinkPortalBackendState {
     pub llm_handler: Arc<dyn ILLMHandler + Send + Sync>,
 }
 
-impl LinkPortalBackendState {
+impl LinkPortalState {
     pub async fn new(config: &Arc<AppConfig>) -> Self {
         let cache_config = &config.cache;
 
@@ -113,7 +113,7 @@ impl LinkPortalBackendState {
         }
         let modsec_rules = Arc::new(rules);
 
-        let app_state = LinkPortalBackendState {
+        let app_state = LinkPortalState {
             // Notice: Arc object clone only increments the reference counter, and does not copy the actual data block.
             config: config.clone(),
             // The basic operators.

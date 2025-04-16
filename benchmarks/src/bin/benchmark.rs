@@ -23,10 +23,10 @@
 use clap::{Arg, Command};
 
 fn main() {
-    let app = Command::new("LinkPortalBackend for Benchmarks")
+    let app = Command::new("LinkPortal for Benchmarks")
         .version("1.0.0")
         .author("James Wong")
-        .about("LinkPortalBackend for Benchmarks")
+        .about("LinkPortal for Benchmarks")
         .arg_required_else_help(true) // When no args are provided, show help.
         .arg(
             Arg::new("thread_num")

@@ -32,7 +32,7 @@ use linkportal_server::{
         config::{self, AppConfig, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION},
         swagger,
     },
-    context::state::LinkPortalBackendState,
+    context::state::LinkPortalState,
     llm::handler::llm_base::LLMManager,
     mgmt::{apm, health::init as health_router},
     sys::route::{
@@ -48,17 +48,14 @@ use tower_http::trace::TraceLayer;
 
 pub struct WebServer {}
 
-pub type MiddlewareFunction = fn(
-    State<LinkPortalBackendState>,
-    Request<Body>,
-    Next,
-) -> Pin<Box<dyn Future<Output = Response<Body>> + Send + 'static>>;
+pub type MiddlewareFunction =
+    fn(State<LinkPortalState>, Request<Body>, Next) -> Pin<Box<dyn Future<Output = Response<Body>> + Send + 'static>>;
 
 impl WebServer {
     pub const COMMAND_NAME: &'static str = "server";
 
     pub fn build() -> Command {
-        Command::new(Self::COMMAND_NAME).about("Run LinkPortal Backend ModSec proxy Web Server.")
+        Command::new(Self::COMMAND_NAME).about("Run LinkPortal Backend Web Server.")
     }
 
     #[allow(unused)]
@@ -80,7 +77,7 @@ impl WebServer {
         tracing::info!("Management server is started");
 
         // let dummy_addition_middleware = None::<
-        //     fn(State<LinkPortalBackendState>, Request<Body>, Next) -> Pin<Box<dyn Future<Output = IntoResponse> + Send + 'static>>,
+        //     fn(State<LinkPortalState>, Request<Body>, Next) -> Pin<Box<dyn Future<Output = IntoResponse> + Send + 'static>>,
         // >;
         Self::start(&config, true, None, None).await;
 
@@ -91,12 +88,12 @@ impl WebServer {
     pub async fn start(
         config: &Arc<AppConfig>,
         verbose: bool,
-        addition_router: Option<Router<LinkPortalBackendState>>,
+        addition_router: Option<Router<LinkPortalState>>,
         addition_middleware: Option<MiddlewareFunction>,
     ) {
         LLMManager::init().await;
 
-        let app_state = LinkPortalBackendState::new(&config).await;
+        let app_state = LinkPortalState::new(&config).await;
 
         // let a = auth_middleware;
 

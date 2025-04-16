@@ -23,10 +23,10 @@ use axum::Router;
 use clap::Command;
 use linkportal_server::config::config::AppConfig;
 use linkportal_server::config::config::{self, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION};
-use linkportal_server::context::state::LinkPortalBackendState;
+use linkportal_server::context::state::LinkPortalState;
 use linkportal_server::llm::handler::llm_base::LLMManager;
 use linkportal_server::mgmt::{apm, health::init as health_router};
-use linkportal_updater::updater_base::LinkPortalBackendUpdaterManager;
+use linkportal_updater::updater_base::LinkPortalUpdaterManager;
 use linkportal_utils::panics::PanicHelper;
 use linkportal_utils::tokio_signal::tokio_graceful_shutdown_signal;
 use std::env;
@@ -34,14 +34,14 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::oneshot;
 
-pub struct LinkPortalBackendUpdaterServer {}
+pub struct LinkPortalUpdaterServer {}
 
-impl LinkPortalBackendUpdaterServer {
+impl LinkPortalUpdaterServer {
     pub const COMMAND_NAME: &'static str = "updater";
 
     pub fn build() -> Command {
         Command::new(Self::COMMAND_NAME)
-            .about("Run LinkPortalBackend based on AI LLM + Vector DB ModSec rules Updater.")
+            .about("Run LinkPortal based on AI LLM + Vector DB Transactions Event Analysis Data Updater.")
     }
 
     #[allow(unused)]
@@ -70,15 +70,15 @@ impl LinkPortalBackendUpdaterServer {
     #[allow(unused)]
     async fn start(config: &Arc<AppConfig>, verbose: bool) {
         LLMManager::init().await;
-        LinkPortalBackendUpdaterManager::init().await;
+        LinkPortalUpdaterManager::init().await;
 
-        let app_state = LinkPortalBackendState::new(&config).await;
+        let app_state = LinkPortalState::new(&config).await;
 
         let bind_addr = config.server.get_bind_addr();
-        tracing::info!("Starting LinkPortalBackend Updater server on {}", bind_addr);
+        tracing::info!("Starting LinkPortal Updater server on {}", bind_addr);
         let listener = match TcpListener::bind(&bind_addr).await {
             Ok(l) => {
-                tracing::info!("LinkPortalBackend Updater server is ready on {}", bind_addr);
+                tracing::info!("LinkPortal Updater server is ready on {}", bind_addr);
                 l
             }
             Err(e) => {
@@ -94,11 +94,11 @@ impl LinkPortalBackendUpdaterServer {
             .await
         {
             Ok(_) => {
-                tracing::info!("LinkPortalBackend Updater server shut down gracefully");
+                tracing::info!("LinkPortal Updater server shut down gracefully");
             }
             Err(e) => {
                 tracing::error!("Error running web server: {}", e);
-                panic!("Error start LinkPortalBackend Updater server: {}", e);
+                panic!("Error start LinkPortal Updater server: {}", e);
             }
         }
     }

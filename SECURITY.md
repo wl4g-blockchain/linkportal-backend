@@ -9,8 +9,8 @@
 
 ## Reporting a Vulnerability
 
-We place great importance on the security of LinkPortalBackend code, software,
-and cloud platform. If you come across a security vulnerability in LinkPortalBackend,
+We place great importance on the security of LinkPortal code, software,
+and cloud platform. If you come across a security vulnerability in LinkPortal,
 we kindly request that you inform us immediately. We will thoroughly investigate
 all valid reports and make every effort to resolve the issue promptly.
 

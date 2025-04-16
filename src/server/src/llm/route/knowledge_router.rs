@@ -18,7 +18,7 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use crate::context::state::LinkPortalBackendState;
+use crate::context::state::LinkPortalState;
 use axum::{
     extract::{Multipart, State},
     response::IntoResponse,
@@ -34,7 +34,7 @@ use std::path::PathBuf;
 use tokio::fs::create_dir_all;
 use uuid::Uuid;
 
-pub fn init() -> Router<LinkPortalBackendState> {
+pub fn init() -> Router<LinkPortalState> {
     Router::new().route("/api/v1/knowledge/upload", post(handle_knowledge_upload))
 }
 
@@ -45,10 +45,7 @@ pub fn init() -> Router<LinkPortalBackendState> {
     responses((status = 200, description = "Upload Knowledge.", body = KnowledgeUploadInfo)),
     tag = "Knowledge"
 )]
-async fn handle_knowledge_upload(
-    State(state): State<LinkPortalBackendState>,
-    mut multipart: Multipart,
-) -> impl IntoResponse {
+async fn handle_knowledge_upload(State(state): State<LinkPortalState>, mut multipart: Multipart) -> impl IntoResponse {
     // Create temp directory for uploaded files
     let temp_dir = std::env::var("TEMP_FILE_DIR").unwrap_or_else(|_| "/tmp/knowledge_upload".to_string());
     let temp_dir_path = PathBuf::from(&temp_dir);

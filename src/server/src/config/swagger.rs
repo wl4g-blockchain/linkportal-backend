@@ -30,11 +30,11 @@ use utoipa_swagger_ui::SwaggerUi;
 #[openapi(
     info(
         version = "1.0.0",
-        title = "LinkPortalBackend",
+        title = "LinkPortal",
         description = "A Open Source AI RWA Chain Portal Backend written in Rust.",
         license(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0"),
         contact(
-            name = "LinkPortalBackend",
+            name = "LinkPortal",
             url = "https://github.com/wl4g-blockchain/linkportal",
             email = "jameswong1376@gmail.com"
         )

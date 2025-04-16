@@ -18,7 +18,7 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use crate::{context::state::LinkPortalBackendState, util::auths};
+use crate::{context::state::LinkPortalState, util::auths};
 use axum::{extract::State, response::IntoResponse};
 use hyper::{header, StatusCode, Uri};
 use rust_embed::RustEmbed;
@@ -27,7 +27,7 @@ use rust_embed::RustEmbed;
 #[folder = "../../static/"]
 struct Asset;
 
-pub async fn handle_static(State(state): State<LinkPortalBackendState>, uri: Uri) -> impl IntoResponse {
+pub async fn handle_static(State(state): State<LinkPortalState>, uri: Uri) -> impl IntoResponse {
     let mut path = auths::clean_context_path(&state.config.server.context_path, uri.path());
     path = path.trim_start_matches("/static/");
 

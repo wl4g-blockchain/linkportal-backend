@@ -1,4 +1,4 @@
-# LinkPortalBackend
+# LinkPortal
 
 > A Open Source AI RWA Chain Portal Backend written in Rust.
 
@@ -53,7 +53,7 @@ cargo build --target aarch64-apple-darwin
 # Build for Generic Linux (Unknown means vendor-less bound)
 cargo build --target x86_64-unknown-linux-gnu
 
-# Run LinkPortalBackend
+# Run LinkPortal
 ./target/debug/linkportal
 ```
 
@@ -75,7 +75,7 @@ docker run -d \
 registry.cn-shenzhen.aliyuncs.com/wl4g/linkportal:latest
 ```
 
-### Verify LinkPortalBackend via directly
+### Verify LinkPortal via directly
 
 ```bash
 curl -I -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36' \
@@ -83,9 +83,9 @@ http://localhost:9000/admin/get
 #HTTP/1.1 403 Forbidden
 #content-length: 23
 #date: Sun, 09 Mar 2025 10:07:27 GM
-#x-waf-blocked: 1001    <== LinkPortalBackend Intercepted
+#x-waf-blocked: 1001    <== LinkPortal Intercepted
 
-# Corresponding to the LinkPortalBackend ModSecurity rule: ↓↓↓
+# Corresponding to the LinkPortal ModSecurity rule: ↓↓↓
 #SecRuleEngine On
 #SecRule REQUEST_URI "@rx admin" "id:1000,phase:1,deny,status:403,msg:'Forbidden Admin Path Detected'"
 ```
@@ -121,7 +121,7 @@ server {
 
     location / {
         proxy_set_header X-Upstream-Destination "http://${LOCAL_IP}:8080";
-        proxy_pass http://${LOCAL_IP}:9000; # Proxy to LinkPortalBackend
+        proxy_pass http://${LOCAL_IP}:9000; # Proxy to LinkPortal
         error_page 433 = @handle_waf_block;
         proxy_intercept_errors off;
     }
@@ -148,7 +148,7 @@ docker run -d \
 registry.cn-shenzhen.aliyuncs.com/wl4g/nginx:1.27.3-alpine3.20
 ```
 
-### Verify LinkPortalBackend via Nginx
+### Verify LinkPortal via Nginx
 
 ```bash
 curl -I -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36' \
@@ -158,7 +158,7 @@ http://localhost:8888/admin/get
 #Date: Sun, 09 Mar 2025 10:01:52 GMT
 #Content-Length: 23
 #Connection: keep-alive
-#x-waf-blocked: 1001    <== LinkPortalBackend Intercepted
+#x-waf-blocked: 1001    <== LinkPortal Intercepted
 ```
 
 ## FAQ

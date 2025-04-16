@@ -1,10 +1,10 @@
 # Welcome 👋
 
-Thanks a lot for considering contributing to LinkPortalBackend. We believe people like you would make LinkPortalBackend a great product. We intend to build a community where individuals can have open talks, show respect for one another, and speak with true ❤️. Meanwhile, we are to keep transparency and make your effort count here.
+Thanks a lot for considering contributing to LinkPortal. We believe people like you would make LinkPortal a great product. We intend to build a community where individuals can have open talks, show respect for one another, and speak with true ❤️. Meanwhile, we are to keep transparency and make your effort count here.
 
 Please read the guidelines, and they can help you get started. Communicate with respect to developers maintaining and developing the project. In return, they should reciprocate that respect by addressing your issue, reviewing changes, as well as helping finalize and merge your pull requests.
 
-Follow our [README](https://github.com/wl4g-blockchain/linkportal#readme) to get the whole picture of the project. To learn about the design of LinkPortalBackend, please refer to the [design docs](https://github.com/wl4g/docs).
+Follow our [README](https://github.com/wl4g-blockchain/linkportal#readme) to get the whole picture of the project. To learn about the design of LinkPortal, please refer to the [design docs](https://github.com/wl4g/docs).
 
 ## Your First Contribution
 
@@ -18,11 +18,11 @@ It can feel intimidating to contribute to a complex project, but it can also be 
 
 Pull requests are great, but we accept all kinds of other help if you like. Such as
 
-- Write tutorials or blog posts. Blog, speak about, or create tutorials about one of LinkPortalBackend's many features. Mention [@linkportal](https://twitter.com/linkportal) on Twitter and email <linkportal@gmail.com> so we can give pointers and tips and help you spread the word by promoting your content on LinkPortalBackend communication channels.
+- Write tutorials or blog posts. Blog, speak about, or create tutorials about one of LinkPortal's many features. Mention [@linkportal](https://twitter.com/linkportal) on Twitter and email <linkportal@gmail.com> so we can give pointers and tips and help you spread the word by promoting your content on LinkPortal communication channels.
 - Improve the documentation. [Submit documentation](https://github.com/wl4g-blockchain/linkportal/docs/) updates, enhancements, designs, or bug fixes, and fixing any spelling or grammar errors will be very much appreciated.
-- Present at meetups and conferences about your LinkPortalBackend projects. Your unique challenges and successes in building things with LinkPortalBackend can provide great speaking material. We'd love to review your talk abstract, so get in touch with us if you'd like some help!
+- Present at meetups and conferences about your LinkPortal projects. Your unique challenges and successes in building things with LinkPortal can provide great speaking material. We'd love to review your talk abstract, so get in touch with us if you'd like some help!
 - Submitting bug reports. To report a bug or a security issue, you can [open a new GitHub issue](https://github.com/wl4g-blockchain/linkportal/issues/new).
-- Speak up feature requests. Send feedback is a great way for us to understand your different use cases of LinkPortalBackend better. If you want to share your experience with LinkPortalBackend, or if you want to discuss any ideas, you can start a discussion on [GitHub discussions](https://github.com/wl4g-blockchain/linkportal/discussions), chat with the LinkPortalBackend team on [Slack](https://linkportal.com/slack), or you can tweet [@linkportal](https://twitter.com/linkportal) on Twitter.
+- Speak up feature requests. Send feedback is a great way for us to understand your different use cases of LinkPortal better. If you want to share your experience with LinkPortal, or if you want to discuss any ideas, you can start a discussion on [GitHub discussions](https://github.com/wl4g-blockchain/linkportal/discussions), chat with the LinkPortal team on [Slack](https://linkportal.com/slack), or you can tweet [@linkportal](https://twitter.com/linkportal) on Twitter.
 
 ## Code of Conduct
 
@@ -30,7 +30,7 @@ Also, there are things that we are not looking for because they don't match the 
 
 ## License
 
-LinkPortalBackend uses the [Apache 2.0 license](https://github.com/wl4g-blockchain/linkportal/blob/master/LICENSE) to strike a balance between open contributions and allowing you to use the software however you want.
+LinkPortal uses the [Apache 2.0 license](https://github.com/wl4g-blockchain/linkportal/blob/master/LICENSE) to strike a balance between open contributions and allowing you to use the software however you want.
 
 ## Getting Started
 
@@ -103,11 +103,11 @@ of what you were trying to do and what went wrong. You can also reach for help i
 
 The core team will be thrilled if you would like to participate in any way you like. When you are stuck, try to ask for help by filing an issue, with a detailed description of what you were trying to do and what went wrong. If you have any questions or if you would like to get involved in our community, please check out:
 
-- [LinkPortalBackend Community Slack](https://linkportal.com/slack)
-- [LinkPortalBackend Github Discussions](https://github.com/wl4g-blockchain/linkportal/discussions)
+- [LinkPortal Community Slack](https://linkportal.com/slack)
+- [LinkPortal Github Discussions](https://github.com/wl4g-blockchain/linkportal/discussions)
 
-Also, see some extra LinkPortalBackend content:
+Also, see some extra LinkPortal content:
 
-- [LinkPortalBackend Docs](https://docs.linkportal.com/)
-- [Learn LinkPortalBackend](https://linkportal.com/product/db)
-- [LinkPortalBackend Inc. Website](https://linkportal.com)
+- [LinkPortal Docs](https://docs.linkportal.com/)
+- [Learn LinkPortal](https://linkportal.com/product/db)
+- [LinkPortal Inc. Website](https://linkportal.com)

@@ -21,7 +21,7 @@
 use crate::sys::handler::user_handler::UserHandler;
 use crate::util::auths::SecurityContext;
 use crate::util::web::ValidatedJson;
-use crate::{context::state::LinkPortalBackendState, sys::handler::user_handler::IUserHandler};
+use crate::{context::state::LinkPortalState, sys::handler::user_handler::IUserHandler};
 use axum::{
     extract::{Json, Query, State},
     http::StatusCode,
@@ -35,7 +35,7 @@ use linkportal_types::{
     PageRequest, RespBase,
 };
 
-pub fn init() -> Router<LinkPortalBackendState> {
+pub fn init() -> Router<LinkPortalState> {
     Router::new()
         .route("/sys/user/current", get(handle_get_current_user))
         .route("/sys/user/current", post(handle_post_current_user))
@@ -50,7 +50,7 @@ pub fn init() -> Router<LinkPortalBackendState> {
     responses((status = 200, description = "Getting for current user.", body = User)),
     tag = "User"
 )]
-async fn handle_get_current_user(State(state): State<LinkPortalBackendState>) -> impl IntoResponse {
+async fn handle_get_current_user(State(state): State<LinkPortalState>) -> impl IntoResponse {
     let cur_user = SecurityContext::get_instance().get().await;
     tracing::info!("Getting for current user: {:?}", cur_user);
 
@@ -75,7 +75,7 @@ async fn handle_get_current_user(State(state): State<LinkPortalBackendState>) ->
     tag = "User"
 )]
 async fn handle_post_current_user(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     ValidatedJson(param): ValidatedJson<SaveUserRequestWith>,
 ) -> impl IntoResponse {
     let cur_user = SecurityContext::get_instance().get().await;
@@ -99,7 +99,7 @@ async fn handle_post_current_user(
     tag = "User"
 )]
 async fn handle_query_users(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     Query(param): Query<QueryUserRequest>,
     Query(page): Query<PageRequest>,
 ) -> impl IntoResponse {
@@ -117,7 +117,7 @@ async fn handle_query_users(
     tag = "User"
 )]
 async fn handle_save_user(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     ValidatedJson(param): ValidatedJson<SaveUserRequest>,
 ) -> impl IntoResponse {
     match get_user_handler(&state).save(param).await {
@@ -134,7 +134,7 @@ async fn handle_save_user(
     tag = "User"
 )]
 async fn handle_delete_user(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     Json(param): Json<DeleteUserRequest>,
 ) -> impl IntoResponse {
     match get_user_handler(&state).delete(param).await {
@@ -143,6 +143,6 @@ async fn handle_delete_user(
     }
 }
 
-fn get_user_handler(state: &LinkPortalBackendState) -> Box<dyn IUserHandler + '_> {
+fn get_user_handler(state: &LinkPortalState) -> Box<dyn IUserHandler + '_> {
     Box::new(UserHandler::new(state))
 }

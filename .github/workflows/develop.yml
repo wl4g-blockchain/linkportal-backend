@@ -84,7 +84,7 @@ jobs:
         run: taplo format --check
 
   build:
-    name: Build LinkPortalBackend binaries
+    name: Build LinkPortal binaries
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -147,7 +147,7 @@ jobs:
           path: .
       - name: Unzip binaries
         run: tar -xvf ./bins.tar.gz
-      - name: Run LinkPortalBackend
+      - name: Run LinkPortal
         run: |
           ./bins/linkportal standalone start&
       - name: Fuzz Test

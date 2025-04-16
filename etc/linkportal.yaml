@@ -59,7 +59,7 @@ swagger:
   # version: "1.0.0"
   # license_name: "Apache 2.0"
   # license_url: "https://www.apache.org/licenses/LICENSE-2.0"
-  # contact_name: "LinkPortalBackend API"
+  # contact_name: "LinkPortal API"
   # contact_email: "jameswong1376@gmail.com"
   # contact_url: "https://github.com/wl4g/my-webnote"
   # terms_of_service: "api/terms-of-service"
@@ -160,7 +160,7 @@ services:
   # Notice: Nginx support status code range: 300-599.
   blocked-status-code: 433
   # Blocked response header name when ModSecurity engine forbidded.
-  blocked-header-name: "X-LinkPortalBackend-Blocked"
+  blocked-header-name: "X-LinkPortal-Blocked"
   # Addition response modsec rule id when ModSecurity engine forbidded.
   allow-addition-modsec-info: true
   # ModSec rules updater based LLM, and similar design as k8s multi specification controller implementation.
@@ -184,7 +184,7 @@ services:
       vector-dimensions: 1536
     generate:
       # Notice: The '__' should be used to distinguish different levels of structure properties, such as:
-      # LINKPORTAL_BACKEND__LLM__API_KEY to match LinkPortalBackendProperties{llm:LlmProperties{completion:GenerateProperties{api_key}}}
+      # LINKPORTAL_BACKEND__LLM__API_KEY to match LinkPortalProperties{llm:LlmProperties{completion:GenerateProperties{api_key}}}
       api-uri: "https://dashscope.aliyuncs.com/compatible-mode/v1"
       #api-key: "<YOUR GENERATE API KEY>" # refer to:./.env
       org-id: # Optional

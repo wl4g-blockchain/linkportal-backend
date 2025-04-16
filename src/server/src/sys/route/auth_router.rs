@@ -22,7 +22,7 @@ use crate::util::auths::{self, AuthUserClaims, SecurityContext};
 use crate::util::web::ValidatedJson;
 use crate::{
     config::{config::DEFAULT_404_HTML, resources::handle_static},
-    context::state::LinkPortalBackendState,
+    context::state::LinkPortalState,
     sys::handler::auth_handler::{AuthHandler, IAuthHandler, PrincipalType},
 };
 use axum::{
@@ -83,7 +83,7 @@ pub const EXCLUDED_PREFIX_PATHS: [&str; 8] = [
 
 pub const CSRF_TOKEN_NAME: &str = "csrf_token";
 
-pub fn init() -> Router<LinkPortalBackendState> {
+pub fn init() -> Router<LinkPortalState> {
     let static_resources_uri = STATIC_RESOURCES_PREFIX_URI.to_owned() + "/{*file}";
     Router::new()
         //.route(ROOT_URI, get(handle_page_root))
@@ -104,7 +104,7 @@ pub fn init() -> Router<LinkPortalBackendState> {
 // ----- Global Authentication interceptors. -----
 
 pub async fn auth_middleware(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     req: Request<Body>,
     next: Next,
 ) -> impl IntoResponse {
@@ -179,7 +179,7 @@ pub async fn auth_middleware(
     )
 }
 
-async fn validate_token(state: &LinkPortalBackendState, ak: &str) -> (bool, Option<AuthUserClaims>) {
+async fn validate_token(state: &LinkPortalState, ak: &str) -> (bool, Option<AuthUserClaims>) {
     // 1. Verify the token is valid.
     match auths::validate_jwt(&state.config, ak) {
         std::result::Result::Ok(claims) => {
@@ -250,7 +250,7 @@ async fn handle_page_404() -> impl IntoResponse {
 )]
 #[allow(unused)]
 async fn handle_password_pubkey(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     ValidatedJson(param): ValidatedJson<PasswordPubKeyRequest>,
 ) -> impl IntoResponse {
     let base64_pubkey = get_auth_handler(&state).handle_password_pubkey(param).await.ok();
@@ -276,7 +276,7 @@ async fn handle_password_pubkey(
     tag = "Authentication"
 )]
 pub async fn handle_password_verify(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     request: axum::extract::Request<Body>,
 ) -> impl IntoResponse {
     let headers = &request.headers().clone();
@@ -342,10 +342,7 @@ pub async fn handle_password_verify(
     responses((status = 200, description = "Login for OIDC.")),
     tag = "Authentication"
 )]
-async fn handle_connect_oidc(
-    State(state): State<LinkPortalBackendState>,
-    headers: header::HeaderMap,
-) -> impl IntoResponse {
+async fn handle_connect_oidc(State(state): State<LinkPortalState>, headers: header::HeaderMap) -> impl IntoResponse {
     match &state.oidc_client {
         Some(client) => {
             let (auth_url, csrf_token, nonce) = client
@@ -418,10 +415,7 @@ async fn handle_connect_oidc(
     responses((status = 200, description = "Login for Github.")),
     tag = "Authentication"
 )]
-async fn handle_connect_github(
-    State(state): State<LinkPortalBackendState>,
-    headers: header::HeaderMap,
-) -> impl IntoResponse {
+async fn handle_connect_github(State(state): State<LinkPortalState>, headers: header::HeaderMap) -> impl IntoResponse {
     match &state.github_client {
         Some(client) => {
             let (auth_url, _) = client
@@ -457,7 +451,7 @@ async fn handle_connect_github(
     tag = "Authentication"
 )]
 async fn handle_callback_oidc(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     Query(param): Query<CallbackOidcRequest>,
     headers: header::HeaderMap,
 ) -> impl IntoResponse {
@@ -591,7 +585,7 @@ async fn handle_callback_oidc(
     tag = "Authentication"
 )]
 async fn handle_callback_github(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     Query(param): Query<CallbackGithubRequest>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
@@ -748,7 +742,7 @@ async fn handle_callback_github(
     tag = "Authentication"
 )]
 pub async fn handle_wallet_ethers_verify(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     request: axum::extract::Request<Body>,
 ) -> impl IntoResponse {
     let headers = &request.headers().clone();
@@ -809,7 +803,7 @@ pub async fn handle_wallet_ethers_verify(
     tag = "Authentication"
 )]
 async fn handle_logout(
-    State(state): State<LinkPortalBackendState>,
+    State(state): State<LinkPortalState>,
     headers: header::HeaderMap,
     Query(param): Query<LogoutRequest>,
 ) -> impl IntoResponse {
@@ -853,7 +847,7 @@ async fn handle_logout(
     }
 }
 
-fn get_auth_handler(state: &LinkPortalBackendState) -> Box<dyn IAuthHandler + '_> {
+fn get_auth_handler(state: &LinkPortalState) -> Box<dyn IAuthHandler + '_> {
     // TODO: using dependency injection to get the handler
     Box::new(AuthHandler::new(state))
 }

@@ -19,7 +19,7 @@
 // This includes modifications and derived works.
 
 // use openai::chat::{ChatCompletion, ChatCompletionMessage, ChatCompletionMessageRole};
-use super::updater_base::{ILinkPortalBackendUpdater, LinkPortalBackendAccessEvent};
+use super::updater_base::{ILinkPortalUpdater, LinkPortalAccessEvent};
 use async_trait::async_trait;
 use common_telemetry::info;
 use linkportal_server::{config::config::UpdaterProperties, llm::handler::llm_base::LLMManager};
@@ -63,13 +63,13 @@ impl SimpleLLMUpdater {
     }
 
     #[allow(unused)]
-    async fn fetch_events(&self, page_index: i64, page_size: i64) -> Vec<LinkPortalBackendAccessEvent> {
+    async fn fetch_events(&self, page_index: i64, page_size: i64) -> Vec<LinkPortalAccessEvent> {
         todo!()
     }
 }
 
 #[async_trait]
-impl ILinkPortalBackendUpdater for SimpleLLMUpdater {
+impl ILinkPortalUpdater for SimpleLLMUpdater {
     // start async thread job to re-scaning near real-time recorded access events.
     async fn init(&self) {
         let this = self.clone();

@@ -1,5 +1,5 @@
 # Development build only build the debug version of the artifacts manually.
-name: LinkPortalBackend Development Build
+name: LinkPortal Development Build
 
 on:
   workflow_dispatch: # Allows you to run this workflow manually.
@@ -57,7 +57,7 @@ on:
         default: true
       cargo_profile:
         type: choice
-        description: The cargo profile to use in building LinkPortalBackend.
+        description: The cargo profile to use in building LinkPortal.
         default: nightly
         options:
           - dev
@@ -322,7 +322,7 @@ jobs:
 
   notification:
     if: ${{ always() }} # Not requiring successful dependent jobs, always run.
-    name: Send notification to LinkPortalBackend team
+    name: Send notification to LinkPortal team
     needs: [
       release-images-to-dockerhub
     ]
@@ -335,11 +335,11 @@ jobs:
         if: ${{ needs.release-images-to-dockerhub.outputs.build-result == 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's ${{ env.NEXT_RELEASE_VERSION }} build has completed successfully."}
+            {"text": "LinkPortal's ${{ env.NEXT_RELEASE_VERSION }} build has completed successfully."}
 
       - name: Notifiy dev build failed result
         uses: slackapi/slack-github-action@v1.23.0
         if: ${{ needs.release-images-to-dockerhub.outputs.build-result != 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's ${{ env.NEXT_RELEASE_VERSION }} build has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/${{ env.NEXT_RELEASE_VERSION }}-build.yml'."}
+            {"text": "LinkPortal's ${{ env.NEXT_RELEASE_VERSION }} build has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/${{ env.NEXT_RELEASE_VERSION }}-build.yml'."}

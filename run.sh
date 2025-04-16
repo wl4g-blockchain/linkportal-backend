@@ -54,7 +54,7 @@ function logErr() {
 }
 
 function usages() {
-    echo $"LinkPortalBackend Development and Building and Deployment fast Tooling.
+    echo $"LinkPortal Development and Building and Deployment fast Tooling.
 # for examples
 export GPG_PRIVATE_KEY='-----BEGIN PGP PRIVATE KEY BLOCK-----\n...'
 export GPG_PASSPHRASE='<YOUR_GPG_PASSPHRASE>'

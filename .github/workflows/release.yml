@@ -437,7 +437,7 @@ jobs:
 
   notification:
     if: ${{ always() }} # Not requiring successful dependent jobs, always run.
-    name: Send notification to LinkPortalBackend team
+    name: Send notification to LinkPortal team
     needs: [
       release-images-to-dockerhub,
       build-macos-artifacts,
@@ -452,11 +452,11 @@ jobs:
         if: ${{ needs.release-images-to-dockerhub.outputs.build-image-result == 'success' && needs.build-windows-artifacts.outputs.build-windows-result == 'success' && needs.build-macos-artifacts.outputs.build-macos-result == 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's release version has completed successfully."}
+            {"text": "LinkPortal's release version has completed successfully."}
 
       - name: Notifiy release failed result
         uses: slackapi/slack-github-action@v1.25.0
         if: ${{ needs.release-images-to-dockerhub.outputs.build-image-result != 'success' || needs.build-windows-artifacts.outputs.build-windows-result != 'success' || needs.build-macos-artifacts.outputs.build-macos-result != 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's release version has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/release.yml'."}
+            {"text": "LinkPortal's release version has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/release.yml'."}
