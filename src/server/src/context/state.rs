@@ -20,7 +20,7 @@
 
 use crate::{
     cache::{memory::StringMemoryCache, redis::StringRedisCache, CacheContainer},
-    config::config::{self, AppConfig, AppDBType},
+    config::config::{AppConfig, AppDBType},
     llm::handler::llm_base::{ILLMHandler, LLMManager},
     mgmt::health::{MongoChecker, RedisClusterChecker, SQLiteChecker},
     store::{
@@ -30,7 +30,6 @@ use crate::{
 };
 use linkportal_types::user::User;
 use linkportal_utils::httpclients;
-use modsecurity::{ModSecurity, Rules};
 use oauth2::basic::BasicClient;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -50,8 +49,6 @@ pub struct LinkPortalState {
     // The System Module repositories.
     pub user_repo: Arc<Mutex<RepositoryContainer<User>>>,
     // The Service Module repositories.
-    pub modsec_engine: Arc<ModSecurity>,
-    pub modsec_rules: Arc<Rules>,
     pub llm_handler: Arc<dyn ILLMHandler + Send + Sync>,
 }
 
@@ -97,22 +94,6 @@ impl LinkPortalState {
             },
         );
 
-        let modsec_engine = Arc::new(ModSecurity::default());
-
-        let mut rules = Rules::new();
-        for rule in config::get_config().services.static_rules.clone() {
-            if rule.kind == "RAW" {
-                tracing::info!(
-                    "Loading the security static rule: {} - {} - {}",
-                    rule.name,
-                    rule.kind,
-                    rule.value
-                );
-                rules.add_plain(rule.value.as_str()).expect("Failed to add rules");
-            }
-        }
-        let modsec_rules = Arc::new(rules);
-
         let app_state = LinkPortalState {
             // Notice: Arc object clone only increments the reference counter, and does not copy the actual data block.
             config: config.clone(),
@@ -128,8 +109,6 @@ impl LinkPortalState {
             // The System repositories.
             user_repo: Arc::new(Mutex::new(user_repo)),
             // The Application repositories.
-            modsec_engine,
-            modsec_rules,
             llm_handler: LLMManager::get_default_implementation(),
         };
 

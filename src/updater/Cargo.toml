@@ -19,7 +19,6 @@ axum.workspace = true
 hyper.workspace = true
 lazy_static.workspace = true
 clap.workspace = true
-modsecurity.workspace = true
 serde.workspace = true
 validator.workspace = true
 tokio.workspace = true

@@ -123,7 +123,7 @@ impl LinkPortalUpdaterServer {
         );
         eprintln!("                Git Commit Hash: {:?}", GIT_COMMIT_HASH);
         eprintln!("                 Git Build Date: {:?}", GIT_BUILD_DATE);
-        let path = env::var("LINKPORTAL_BACKEND_CFG_PATH").unwrap_or("none".to_string());
+        let path = env::var("LINKPORTAL_CFG_PATH").unwrap_or("none".to_string());
         eprintln!("        Configuration file path: {:?}", path);
         eprintln!(
             "            Web Serve listen on: \"{}://{}:{}\"",

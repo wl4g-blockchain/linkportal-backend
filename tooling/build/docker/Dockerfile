@@ -32,17 +32,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 #   Alibaba Cloud Internal: http://mirrors.cloud.aliyuncs.com
 #   Alibaba Cloud External: http://mirrors.aliyun.com
 #
-# Notice: If you use modsecurity-1.0.0, you must rely on libmodsecurity>=3.0.13. For Linux, 
-# see: /usr/lib/x86_64-linux-gnu/pkgconfig/modsecurity.pc. Rust-1.85 is the latest version of 
-# the default source of debian-12 and only supports libmodsecurity-3.0.9.
 RUN rm -f /etc/apt/sources.list.d/debian.sources && \
     echo "deb ${BUILD_MIRROR_URL}/debian bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
     echo "deb ${BUILD_MIRROR_URL}/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
     echo "deb ${BUILD_MIRROR_URL}/debian bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        libmodsecurity3 \
-        libmodsecurity-dev \
         pkg-config \
         ca-certificates \
         && \
@@ -142,7 +137,6 @@ RUN rm -f /etc/apt/sources.list.d/debian.sources && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         tini \
-        libmodsecurity3 \
         libssl3 \
         ca-certificates \
         && \

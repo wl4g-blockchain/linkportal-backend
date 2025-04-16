@@ -41,8 +41,8 @@
             "env": {
                 "MALLOC_CONF": "prof:true,lg_prof_interval:28", // Set the stack trace sampling interval of jemalloc to bytes, e.g. 28 about is 256 MB
                 "RUST_BACKTRACE": "full",
-                "LINKPORTAL_BACKEND_CFG_PATH": "${workspaceFolder}/etc/linkportal.yaml",
-                //"LINKPORTAL_BACKEND_CFG_VERBOSE": "true"
+                "LINKPORTAL_CFG_PATH": "${workspaceFolder}/etc/linkportal.yaml",
+                //"LINKPORTAL_CFG_VERBOSE": "true"
             },
             "args": [
                 "standalone" // server|updater

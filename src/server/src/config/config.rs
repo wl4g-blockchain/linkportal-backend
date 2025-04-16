@@ -382,15 +382,6 @@ pub struct PgVectorDBProperties {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServicesProperties {
-    // Notice: Nginx support status code range: 300-599.
-    #[serde(rename = "blocked-status-code")]
-    pub blocked_status_code: Option<u16>,
-    #[serde(rename = "blocked-header-name")]
-    pub blocked_header_name: String,
-    #[serde(rename = "allow-addition-modsec-info")]
-    pub allow_addition_modsec_info: bool,
-    #[serde(rename = "static-rules")]
-    pub static_rules: Vec<StaticRule>,
     #[serde(rename = "updaters")]
     pub updaters: Vec<UpdaterProperties>,
     #[serde(rename = "llm", default = "LlmProperties::default")]
@@ -809,10 +800,6 @@ impl Deref for PgVectorDBProperties {
 impl Default for ServicesProperties {
     fn default() -> Self {
         ServicesProperties {
-            blocked_status_code: None,
-            blocked_header_name: String::from("X-LinkPortal-Blocked"),
-            allow_addition_modsec_info: true,
-            static_rules: vec![],
             llm: LlmProperties::default(),
             updaters: Vec::new(),
             forward: ForwardProperties::default(),
@@ -986,14 +973,14 @@ impl AppConfig {
 fn init() -> Arc<AppConfig> {
     dotenv().ok(); // Notice: Must be called before parse from environment file (.env).
 
-    let yaml_config = env::var("LINKPORTAL_BACKEND_CFG_PATH")
+    let yaml_config = env::var("LINKPORTAL_CFG_PATH")
         .map(|path| {
             Config::builder()
                 .add_source(config::File::with_name(path.as_str()))
                 .add_source(
                     // Extrat candidate from env refer to: https://github.com/rust-cli/config-rs/blob/v0.15.9/src/env.rs#L290
                     // Set up into hierarchy struct attibutes refer to:https://github.com/rust-cli/config-rs/blob/v0.15.9/src/source.rs#L24
-                    config::Environment::with_prefix("LINKPORTAL_BACKEND")
+                    config::Environment::with_prefix("LINKPORTAL")
                         // Notice: Use double "_" to distinguish between different hierarchy struct or attribute alies at the same level.
                         .separator("__")
                         .convert_case(config::Case::Cobol)
@@ -1008,8 +995,8 @@ fn init() -> Arc<AppConfig> {
 
     let config = AppConfig::new(&yaml_config);
 
-    if env::var("LINKPORTAL_BACKEND_CFG_VERBOSE").is_ok() || env::var("VERBOSE").is_ok() {
-        println!("If you don't want to print the loaded configuration details, you can disable it by set up LINKPORTAL_BACKEND_CFG_VERBOSE=false.");
+    if env::var("LINKPORTAL_CFG_VERBOSE").is_ok() || env::var("VERBOSE").is_ok() {
+        println!("If you don't want to print the loaded configuration details, you can disable it by set up LINKPORTAL_CFG_VERBOSE=false.");
         println!(
             "Loaded the config details: {}",
             serde_json::to_string(&config.to_owned().inner).unwrap()

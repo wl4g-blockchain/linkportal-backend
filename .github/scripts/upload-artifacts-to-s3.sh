@@ -7,7 +7,7 @@ ARTIFACTS_DIR=$1
 VERSION=$2
 AWS_S3_BUCKET=$3
 RELEASE_DIRS="releases/linkportal"
-LINKPORTAL_BACKEND_REPO="wl4g/linkportal"
+LINKPORTAL_REPO="wl4g/linkportal"
 
 # Check if necessary variables are set.
 function check_vars() {
@@ -69,7 +69,7 @@ function download_artifacts_from_github() {
     fi
 
     # Get the latest release API response.
-    RELEASES_API_RESPONSE=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/$LINKPORTAL_BACKEND_REPO/releases/latest")
+    RELEASES_API_RESPONSE=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/$LINKPORTAL_REPO/releases/latest")
 
     # Extract download URLs for the artifacts.
     # Exclude source code archives which are typically named as 'linkportal-<version>.zip' or 'linkportal-<version>.tar.gz'.
