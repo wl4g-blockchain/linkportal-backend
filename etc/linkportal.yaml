@@ -19,7 +19,7 @@
 # This includes modifications and derived works.
 #
 
-service-name: linkportal-backend
+service-name: linkportal
 
 server:
   host: 0.0.0.0
@@ -54,14 +54,14 @@ logging:
 
 swagger:
   enabled: true
-  # title: "My Webnote API Server"
-  # description: "The My Webnote API Server"
+  # title: "LinkPortal API Server"
+  # description: "The LinkPortal backend API Server"
   # version: "1.0.0"
   # license_name: "Apache 2.0"
   # license_url: "https://www.apache.org/licenses/LICENSE-2.0"
   # contact_name: "LinkPortal API"
   # contact_email: "jameswong1376@gmail.com"
-  # contact_url: "https://github.com/wl4g/my-webnote"
+  # contact_url: "https://github.com/wl4g-blockchain/linkportal-backend"
   # terms_of_service: "api/terms-of-service"
   ui_path: "/swagger-ui"
   openapi_url: "/swagger-ui/openapi.json"
@@ -156,14 +156,7 @@ vecdb:
     use-ssl: false
 
 services:
-  # Blocked response status code when ModSecurity engine forbidded. If not set, the modsec matched status code.
-  # Notice: Nginx support status code range: 300-599.
-  blocked-status-code: 433
-  # Blocked response header name when ModSecurity engine forbidded.
-  blocked-header-name: "X-LinkPortal-Blocked"
-  # Addition response modsec rule id when ModSecurity engine forbidded.
-  allow-addition-modsec-info: true
-  # ModSec rules updater based LLM, and similar design as k8s multi specification controller implementation.
+  # Chain transaction event data Analysis updater based LLM.
   updaters:
     - name: "defaultUpdater"
       kind: "SIMPLE_LLM"
@@ -196,19 +189,11 @@ services:
       top-k: 1
       top-p: 0.9
       system-prompt: |-
-        You are a security expert.
+        You are a block chain security expert.
         You are given a list of rules and a request.
         You must determine if the request is safe or not.
         If the request is safe, you must return "safe".
         If the request is not safe, you must return "unsafe" and provide a reason.
         You must also provide a list of rules that were used to determine the result.
         You must also providea list of rules that were not used to determine the result.
-  forward:
-    max-body-bytes: 65535
-    #http-proxy: "http://127.0.0.1:8118"
-    connect-timeout: 5
-    read-timeout: 10
-    total-timeout: 15
-    verbose: true
-    # Getting upstream destination header name from frontend(e.g: nginx)
-    upstream-destination-header-name: "X-Upstream-Destination"
+
