@@ -31,7 +31,7 @@ use utoipa_swagger_ui::SwaggerUi;
     info(
         version = "1.0.0",
         title = "LinkPortalBackend",
-        description = "LinkPortalBackend - A Mini Open Source AI Bot WAF written in Rust.",
+        description = "A Open Source AI RWA Chain Portal Backend written in Rust.",
         license(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0"),
         contact(
             name = "LinkPortalBackend",

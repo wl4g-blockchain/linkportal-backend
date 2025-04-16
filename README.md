@@ -1,6 +1,6 @@
 # LinkPortalBackend
 
-> LinkPortalBackend - A Mini Open Source AI Bot WAF written in Rust.
+> A Open Source AI RWA Chain Portal Backend written in Rust.
 
 ## Prerequisites
 

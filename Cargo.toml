@@ -21,7 +21,7 @@ authors = ["James Wong <jameswong1376@gmail.com>"]
 repository = "https://github.com/wl4g-blockchain/linkportalbackend"
 readme = "README.md"
 license = "GPL-3.0"
-description = "LinkPortalBackend - A Mini Open Source AI Bot WAF written in Rust."
+description = "A Open Source AI RWA Chain Portal Backend written in Rust."
 keywords = ["AI", "Modsecurity", "Security", "WAF"]
 edition = "2021"
 

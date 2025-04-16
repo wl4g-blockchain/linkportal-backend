@@ -110,7 +110,7 @@ FROM registry.cn-shenzhen.aliyuncs.com/wl4g/debian:bookworm
 # Build project metadata labels.
 ARG PROJECT_NAME=linkportalbackend
 ARG PROJECT_REPO="https://github.com/wl4g-blockchain/linkportalbackend"
-ARG PROJECT_DESC="LinkPortalBackend - A Mini Open Source AI Bot WAF written in Rust."
+ARG PROJECT_DESC="A Open Source AI RWA Chain Portal Backend written in Rust."
 ARG PROJECT_MAINTAINER="James Wong<jameswong1376@gmail.com>"
 ARG BUILD_COMMIT_ID=""
 ARG BUILD_BRANCH=""

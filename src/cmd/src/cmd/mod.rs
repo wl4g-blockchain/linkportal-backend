@@ -72,7 +72,7 @@ pub fn execute_commands_app() -> () {
         .author("James Wong")
         .about(
             format!(
-                "LinkPortalBackend - A Mini Open Source AI Bot WAF written in Rust.\n\n{}",
+                "A Open Source AI RWA Chain Portal Backend written in Rust.\n\n{}",
                 config::VERSION.as_str()
             )
             .to_owned(),

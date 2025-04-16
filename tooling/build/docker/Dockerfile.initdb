@@ -23,7 +23,7 @@ ARG BUILD_TIME
 ARG BUILD_MIRROR_URL
 
 LABEL maintainer="James Wong<jameswong1376@gmail.com>" \
-  description="LinkPortalBackend - A Mini Open Source AI Bot WAF written in Rust." \
+  description="A Open Source AI RWA Chain Portal Backend written in Rust." \
   buildRepoUrl=${BUILD_REPO_URL} \
   buildBranch=${BUILD_BRANCH} \
   buildTag=${BUILD_TAG} \
