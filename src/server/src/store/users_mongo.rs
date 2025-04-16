@@ -30,8 +30,8 @@ use super::mongo::MongoRepository;
 use super::AsyncRepository;
 use crate::config::config::MongoAppDBProperties;
 use crate::{dynamic_mongo_insert, dynamic_mongo_query, dynamic_mongo_update};
-use linkportalbackend_types::user::User;
-use linkportalbackend_types::{PageRequest, PageResponse};
+use linkportal_types::user::User;
+use linkportal_types::{PageRequest, PageResponse};
 
 pub struct UserMongoRepository {
     #[allow(unused)]

@@ -27,7 +27,7 @@ use axum::{
     Router,
 };
 use clap::Command;
-use linkportalbackend_server::{
+use linkportal_server::{
     config::{
         config::{self, AppConfig, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION},
         swagger,
@@ -40,7 +40,7 @@ use linkportalbackend_server::{
         user_router::init as user_router,
     },
 };
-use linkportalbackend_utils::{panics::PanicHelper, tokio_signal::tokio_graceful_shutdown_signal};
+use linkportal_utils::{panics::PanicHelper, tokio_signal::tokio_graceful_shutdown_signal};
 use std::{env, future::Future, pin::Pin, sync::Arc};
 use tokio::{net::TcpListener, sync::oneshot};
 use tower::ServiceBuilder;
@@ -58,7 +58,7 @@ impl WebServer {
     pub const COMMAND_NAME: &'static str = "server";
 
     pub fn build() -> Command {
-        Command::new(Self::COMMAND_NAME).about("Run LinkPortalBackend ModSec proxy Web Server.")
+        Command::new(Self::COMMAND_NAME).about("Run LinkPortal Backend ModSec proxy Web Server.")
     }
 
     #[allow(unused)]

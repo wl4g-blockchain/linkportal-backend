@@ -69,7 +69,7 @@ env:
 jobs:
   allocate-runners:
     name: Allocate runners
-    if: ${{ github.repository == 'wl4g/linkportalbackend' }}
+    if: ${{ github.repository == 'wl4g/linkportal' }}
     runs-on: ubuntu-20.04
     outputs:
       linux-amd64-runner: ${{ steps.start-linux-amd64-runner.outputs.label }}
@@ -220,7 +220,7 @@ jobs:
         with:
           src-image-registry: docker.io
           src-image-namespace: ${{ vars.IMAGE_NAMESPACE }}
-          src-image-name: linkportalbackend
+          src-image-name: linkportal
           dst-image-registry-username: ${{ secrets.ALICLOUD_USERNAME }}
           dst-image-registry-password: ${{ secrets.ALICLOUD_PASSWORD }}
           dst-image-registry: ${{ vars.ACR_IMAGE_REGISTRY }}
@@ -306,4 +306,4 @@ jobs:
         if: ${{ needs.release-images-to-dockerhub.outputs.nightly-build-result != 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's ${{ env.NEXT_RELEASE_VERSION }} build has failed, please check 'https://github.com/wl4g-blockchain/linkportalbackend/actions/workflows/${{ env.NEXT_RELEASE_VERSION }}-build.yml'."}
+            {"text": "LinkPortalBackend's ${{ env.NEXT_RELEASE_VERSION }} build has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/${{ env.NEXT_RELEASE_VERSION }}-build.yml'."}

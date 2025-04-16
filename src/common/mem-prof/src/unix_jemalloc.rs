@@ -36,7 +36,7 @@ pub async fn dump_profile() -> Result<Vec<u8>> {
         .build()
     })?;
     let mut path_buf = PathBuf::from(tmp_path.path());
-    path_buf.push("linkportalbackend.hprof");
+    path_buf.push("linkportal.hprof");
 
     let path = path_buf
         .to_str()

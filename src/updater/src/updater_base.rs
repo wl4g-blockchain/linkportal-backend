@@ -23,7 +23,7 @@ use anyhow::Error;
 use async_trait::async_trait;
 use common_telemetry::info;
 use lazy_static::lazy_static;
-use linkportalbackend_server::config::config;
+use linkportal_server::config::config;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,

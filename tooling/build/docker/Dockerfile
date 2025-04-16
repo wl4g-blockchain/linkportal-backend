@@ -57,7 +57,7 @@ WORKDIR /usr/src/app
 #################################################
 FROM base AS deps
 
-ARG PROJECT_NAME=linkportalbackend
+ARG PROJECT_NAME=linkportal
 
 # Copy only files needed for dependency resolution. (Excluded: 'rust-toolchain.toml' due to containing dev components.)
 COPY benchmarks ./benchmarks
@@ -84,7 +84,7 @@ RUN cargo build --release && \
 ################################################
 FROM base AS builder
 
-ARG PROJECT_NAME=linkportalbackend
+ARG PROJECT_NAME=linkportal
 ARG BUILD_ARGS=""
 
 # Copy cached dependencies
@@ -108,8 +108,8 @@ RUN cargo install ${BUILD_ARGS} --path src/cmd
 FROM registry.cn-shenzhen.aliyuncs.com/wl4g/debian:bookworm
 
 # Build project metadata labels.
-ARG PROJECT_NAME=linkportalbackend
-ARG PROJECT_REPO="https://github.com/wl4g-blockchain/linkportalbackend"
+ARG PROJECT_NAME=linkportal
+ARG PROJECT_REPO="https://github.com/wl4g-blockchain/linkportal"
 ARG PROJECT_DESC="A Open Source AI RWA Chain Portal Backend written in Rust."
 ARG PROJECT_MAINTAINER="James Wong<jameswong1376@gmail.com>"
 ARG BUILD_COMMIT_ID=""
@@ -169,4 +169,4 @@ WORKDIR /app
 ENTRYPOINT ["/usr/bin/tini", "-s", "--", "/usr/local/bin/${PROJECT_NAME}"]
 
 # Default command if none provided
-CMD ["--config", "/app/config/linkportalbackend.yaml"]
+CMD ["--config", "/app/config/linkportal.yaml"]

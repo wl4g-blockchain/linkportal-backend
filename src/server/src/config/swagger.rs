@@ -20,7 +20,7 @@
 
 use super::config::{self, AppConfig};
 use crate::llm::route::knowledge_router::__path_handle_knowledge_upload;
-use linkportalbackend_types::knowledge::KnowledgeUploadInfo;
+use linkportal_types::knowledge::KnowledgeUploadInfo;
 use std::collections::BTreeMap;
 use utoipa::openapi::{PathItem, Paths};
 use utoipa::OpenApi;
@@ -35,12 +35,12 @@ use utoipa_swagger_ui::SwaggerUi;
         license(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0"),
         contact(
             name = "LinkPortalBackend",
-            url = "https://github.com/wl4g-blockchain/linkportalbackend",
+            url = "https://github.com/wl4g-blockchain/linkportal",
             email = "jameswong1376@gmail.com"
         )
     ),
     //security((), "my_auth" = ["read:items", "edit:items"], "token_jwt" = []),
-    external_docs(url = "https://github.com/wl4g-blockchain/linkportalbackend", description = "More about our APIs"),
+    external_docs(url = "https://github.com/wl4g-blockchain/linkportal", description = "More about our APIs"),
     paths(
         // Knowledge
         handle_knowledge_upload,

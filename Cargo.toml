@@ -18,7 +18,7 @@ resolver = "2"
 [workspace.package]
 version = "1.0.0"
 authors = ["James Wong <jameswong1376@gmail.com>"]
-repository = "https://github.com/wl4g-blockchain/linkportalbackend"
+repository = "https://github.com/wl4g-blockchain/linkportal"
 readme = "README.md"
 license = "GPL-3.0"
 description = "A Open Source AI RWA Chain Portal Backend written in Rust."
@@ -41,11 +41,11 @@ common-makestruct = { path = "src/common/makestruct" }
 common-mem-prof = { path = "src/common/mem-prof" }
 common-pprof = { path = "src/common/pprof" }
 common-telemetry = { path = "src/common/telemetry" }
-linkportalbackend-cmd = { path = "src/cmd" }
-linkportalbackend-server = { path = "src/server" }
-linkportalbackend-updater = { path = "src/updater" }
-linkportalbackend-types = { path = "src/types" }
-linkportalbackend-utils = { path = "src/utils" }
+linkportal-cmd = { path = "src/cmd" }
+linkportal-server = { path = "src/server" }
+linkportal-updater = { path = "src/updater" }
+linkportal-types = { path = "src/types" }
+linkportal-utils = { path = "src/utils" }
 
 # Lang libs
 regex = "1.11.1"

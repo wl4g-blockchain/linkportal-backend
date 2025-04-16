@@ -70,10 +70,10 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: sqlness-logs
-        path: /tmp/linkportalbackend-*.log
+        path: /tmp/linkportal-*.log
         retention-days: 3
 
-    - name: Build linkportalbackend binary
+    - name: Build linkportal binary
       shell: bash
       run: |
         make build \
@@ -85,5 +85,5 @@ runs:
       uses: ./.github/actions/upload-artifacts
       with:
         artifacts-dir: ${{ inputs.artifacts-dir }}
-        target-file: target/${{ inputs.arch }}/${{ inputs.cargo-profile }}/linkportalbackend
+        target-file: target/${{ inputs.arch }}/${{ inputs.cargo-profile }}/linkportal
         version: ${{ inputs.version }}

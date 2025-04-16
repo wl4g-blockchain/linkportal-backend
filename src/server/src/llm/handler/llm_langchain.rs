@@ -21,7 +21,7 @@
 use super::llm_base::ILLMHandler;
 use crate::config::config::{self, LlmProperties};
 use anyhow::{Ok, Result};
-use linkportalbackend_types::knowledge::{KnowledgeCategory, KnowledgeStatus, KnowledgeUploadInfo};
+use linkportal_types::knowledge::{KnowledgeCategory, KnowledgeStatus, KnowledgeUploadInfo};
 use langchain_rust::{
     chain::{Chain, ConversationalRetrieverChainBuilder},
     embedding::openai::OpenAiEmbedder,
@@ -213,7 +213,7 @@ impl ILLMHandler for LangchainLLMHandler {
         //     tool_call_id: None,
         //     tool_calls: None,
         // }];
-        // let embedding_result = ChatCompletion::builder(&config::get_config().linkportalbackend.llm.embedding.model, messages.clone())
+        // let embedding_result = ChatCompletion::builder(&config::get_config().linkportal.llm.embedding.model, messages.clone())
         //     .credentials(self.embedding_openai_config.as_ref().to_owned())
         //     .create()
         //     .await;
@@ -246,7 +246,7 @@ Helpful Answer:
                 ];
 
         let opts = VecStoreOptions::new()
-            .with_name_space("linkportalbackend") // TODO: namespace
+            .with_name_space("linkportal") // TODO: namespace
             .with_score_threshold(0.3 as f32); // TODO: score threshold
 
         let retriever = Retriever::new(

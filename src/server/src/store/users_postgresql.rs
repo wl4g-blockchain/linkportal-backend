@@ -23,9 +23,9 @@ use super::AsyncRepository;
 use crate::config::config::PostgresAppDBProperties;
 use anyhow::{Error, Ok};
 use async_trait::async_trait;
-use linkportalbackend_types::user::User;
-use linkportalbackend_types::PageRequest;
-use linkportalbackend_types::PageResponse;
+use linkportal_types::user::User;
+use linkportal_types::PageRequest;
+use linkportal_types::PageResponse;
 
 pub struct UserPostgresRepository {
     inner: PostgresRepository<User>,

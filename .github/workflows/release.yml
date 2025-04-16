@@ -81,7 +81,7 @@ on:
 
 # Use env variables to control all the release process.
 env:
-  # The arguments of building linkportalbackend.
+  # The arguments of building linkportal.
   RUST_TOOLCHAIN: nightly-2023-12-19
   CARGO_PROFILE: nightly
 
@@ -96,7 +96,7 @@ env:
 jobs:
   allocate-runners:
     name: Allocate runners
-    if: ${{ github.repository == 'wl4g/linkportalbackend' }}
+    if: ${{ github.repository == 'wl4g/linkportal' }}
     runs-on: ubuntu-20.04
     outputs:
       linux-amd64-runner: ${{ steps.start-linux-amd64-runner.outputs.label }}
@@ -207,19 +207,19 @@ jobs:
           - os: ${{ needs.allocate-runners.outputs.macos-runner }}
             arch: aarch64-apple-darwin
             features: servers/dashboard
-            artifacts-dir-prefix: linkportalbackend-darwin-arm64
+            artifacts-dir-prefix: linkportal-darwin-arm64
           - os: ${{ needs.allocate-runners.outputs.macos-runner }}
             arch: aarch64-apple-darwin
             features: pyo3_backend,servers/dashboard
-            artifacts-dir-prefix: linkportalbackend-darwin-arm64-pyo3
+            artifacts-dir-prefix: linkportal-darwin-arm64-pyo3
           - os: ${{ needs.allocate-runners.outputs.macos-runner }}
             features: servers/dashboard
             arch: x86_64-apple-darwin
-            artifacts-dir-prefix: linkportalbackend-darwin-amd64
+            artifacts-dir-prefix: linkportal-darwin-amd64
           - os: ${{ needs.allocate-runners.outputs.macos-runner }}
             features: pyo3_backend,servers/dashboard
             arch: x86_64-apple-darwin
-            artifacts-dir-prefix: linkportalbackend-darwin-amd64-pyo3
+            artifacts-dir-prefix: linkportal-darwin-amd64-pyo3
     runs-on: ${{ matrix.os }}
     outputs:
       build-macos-result: ${{ steps.set-build-macos-result.outputs.build-macos-result }}
@@ -256,11 +256,11 @@ jobs:
           - os: ${{ needs.allocate-runners.outputs.windows-runner }}
             arch: x86_64-pc-windows-msvc
             features: servers/dashboard
-            artifacts-dir-prefix: linkportalbackend-windows-amd64
+            artifacts-dir-prefix: linkportal-windows-amd64
           - os: ${{ needs.allocate-runners.outputs.windows-runner }}
             arch: x86_64-pc-windows-msvc
             features: pyo3_backend,servers/dashboard
-            artifacts-dir-prefix: linkportalbackend-windows-amd64-pyo3
+            artifacts-dir-prefix: linkportal-windows-amd64-pyo3
     runs-on: ${{ matrix.os }}
     outputs:
       build-windows-result: ${{ steps.set-build-windows-result.outputs.build-windows-result }}
@@ -346,7 +346,7 @@ jobs:
         with:
           src-image-registry: docker.io
           src-image-namespace: ${{ vars.IMAGE_NAMESPACE }}
-          src-image-name: linkportalbackend
+          src-image-name: linkportal
           dst-image-registry-username: ${{ secrets.ALICLOUD_USERNAME }}
           dst-image-registry-password: ${{ secrets.ALICLOUD_PASSWORD }}
           dst-image-registry: ${{ vars.ACR_IMAGE_REGISTRY }}
@@ -459,4 +459,4 @@ jobs:
         if: ${{ needs.release-images-to-dockerhub.outputs.build-image-result != 'success' || needs.build-windows-artifacts.outputs.build-windows-result != 'success' || needs.build-macos-artifacts.outputs.build-macos-result != 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's release version has failed, please check 'https://github.com/wl4g-blockchain/linkportalbackend/actions/workflows/release.yml'."}
+            {"text": "LinkPortalBackend's release version has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/release.yml'."}

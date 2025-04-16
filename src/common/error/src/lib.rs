@@ -19,7 +19,7 @@
 // This includes modifications and derived works.
 
 // TODO: Should be stable API after issue-58520 is resolved in the future.
-// refer to: https://github.com/wl4g-blockchain/linkportalbackend/blob/main/common/error/src/ext.rs#L57
+// refer to: https://github.com/wl4g-blockchain/linkportal/blob/main/common/error/src/ext.rs#L57
 // #![feature(error_iter)]
 pub mod ext;
 pub mod format;

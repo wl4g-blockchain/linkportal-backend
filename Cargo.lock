@@ -3826,7 +3826,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
 
 [[package]]
-name = "linkportalbackend-cmd"
+name = "linkportal-cmd"
 version = "1.0.0"
 dependencies = [
  "anyhow",
@@ -3841,10 +3841,10 @@ dependencies = [
  "common-pprof",
  "common-telemetry",
  "lazy_static",
- "linkportalbackend-server",
- "linkportalbackend-types",
- "linkportalbackend-updater",
- "linkportalbackend-utils",
+ "linkportal-server",
+ "linkportal-types",
+ "linkportal-updater",
+ "linkportal-utils",
  "log",
  "once_cell",
  "prometheus",
@@ -3862,7 +3862,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "linkportalbackend-server"
+name = "linkportal-server"
 version = "1.0.0"
 dependencies = [
  "anyhow",
@@ -3885,8 +3885,8 @@ dependencies = [
  "jsonwebtoken 9.3.1",
  "langchain-rust",
  "lazy_static",
- "linkportalbackend-types",
- "linkportalbackend-utils",
+ "linkportal-types",
+ "linkportal-utils",
  "mime_guess",
  "modsecurity",
  "moka",
@@ -3930,7 +3930,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "linkportalbackend-types"
+name = "linkportal-types"
 version = "1.0.0"
 dependencies = [
  "anyhow",
@@ -3938,7 +3938,7 @@ dependencies = [
  "chrono",
  "common-makestruct",
  "hyper 1.6.0",
- "linkportalbackend-utils",
+ "linkportal-utils",
  "serde",
  "serde_json",
  "sqlx",
@@ -3947,7 +3947,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "linkportalbackend-updater"
+name = "linkportal-updater"
 version = "1.0.0"
 dependencies = [
  "anyhow",
@@ -3961,9 +3961,9 @@ dependencies = [
  "hyper 1.6.0",
  "langchain-rust",
  "lazy_static",
- "linkportalbackend-server",
- "linkportalbackend-types",
- "linkportalbackend-utils",
+ "linkportal-server",
+ "linkportal-types",
+ "linkportal-utils",
  "modsecurity",
  "moka",
  "openai",
@@ -3985,7 +3985,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "linkportalbackend-utils"
+name = "linkportal-utils"
 version = "1.0.0"
 dependencies = [
  "axum 0.8.3",

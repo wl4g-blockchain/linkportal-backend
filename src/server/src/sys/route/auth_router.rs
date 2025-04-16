@@ -35,14 +35,14 @@ use axum::{
     Router,
 };
 use hyper::HeaderMap;
-use linkportalbackend_types::{
+use linkportal_types::{
     auth::{
         CallbackGithubRequest, CallbackOidcRequest, EthersWalletLoginRequest, GithubUserInfo, LogoutRequest,
         PasswordLoginRequest, PasswordPubKeyRequest, PasswordPubKeyResponse,
     },
     RespBase,
 };
-use linkportalbackend_utils::{self, webs};
+use linkportal_utils::{self, webs};
 use oauth2::{AuthorizationCode, CsrfToken, Scope, TokenResponse};
 use openidconnect::{
     core::{CoreAuthenticationFlow, CoreTokenResponse, CoreUserInfoClaims},

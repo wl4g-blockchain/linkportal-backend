@@ -23,8 +23,8 @@ use crate::{
     sys::{handler::auth_handler::PrincipalType, route::auth_router::EXCLUDED_PREFIX_PATHS},
 };
 use axum::body::Body;
-use linkportalbackend_types::auth::{LoggedResponse, TokenWrapper};
-use linkportalbackend_utils::{base64s::Base64Helper, webs};
+use linkportal_types::auth::{LoggedResponse, TokenWrapper};
+use linkportal_utils::{base64s::Base64Helper, webs};
 use chrono::{Duration, Utc};
 use hyper::{HeaderMap, Response, StatusCode, Uri};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};

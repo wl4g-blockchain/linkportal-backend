@@ -28,8 +28,8 @@ use crate::{
         RepositoryContainer,
     },
 };
-use linkportalbackend_types::user::User;
-use linkportalbackend_utils::httpclients;
+use linkportal_types::user::User;
+use linkportal_utils::httpclients;
 use modsecurity::{ModSecurity, Rules};
 use oauth2::basic::BasicClient;
 use std::sync::Arc;

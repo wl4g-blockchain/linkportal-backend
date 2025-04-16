@@ -168,8 +168,8 @@ fn build_struct(
             }
 
             fn eval(&self, func_ctx: FunctionContext, columns: &[VectorRef]) ->  Result<VectorRef> {
-                // Ensure under the `linkportalbackend` catalog for security
-                ensure_linkportalbackend!(func_ctx);
+                // Ensure under the `linkportal` catalog for security
+                ensure_linkportal!(func_ctx);
 
                 let columns_num = columns.len();
                 let rows_num = if columns.is_empty() {

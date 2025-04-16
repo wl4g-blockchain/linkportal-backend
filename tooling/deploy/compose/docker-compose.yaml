@@ -9,14 +9,14 @@ x-shared-env: &shared-api-worker-env
   DATABASE__SYSTEMDB__PORT: ${POSTGRES_PORT:-5432}
   DATABASE__SYSTEMDB__USER: ${POSTGRES_USER:-postgres}
   DATABASE__SYSTEMDB__PASSWORD: ${POSTGRES_PASSWORD:-changeit}
-  DATABASE__SYSTEMDB__DATABASE: ${POSTGRES_DATABASE:-linkportalbackend}
+  DATABASE__SYSTEMDB__DATABASE: ${POSTGRES_DATABASE:-linkportal}
   DATABASE__SYSTEMDB__MIN_CONNECTION: ${POSTGRES_MIN_CONNECTION:-1}
   DATABASE__SYSTEMDB__MAX_CONNECTION: ${POSTGRES_MAX_CONNECTION:-10}
   DATABASE__PGVECTOR__HOST: ${POSTGRES_HOST:-pgvector}
   DATABASE__PGVECTOR__PORT: ${POSTGRES_PORT:-5432}
   DATABASE__PGVECTOR__USER: ${POSTGRES_USER:-postgres}
   DATABASE__PGVECTOR__PASSWORD: ${POSTGRES_PASSWORD:-changeit}
-  DATABASE__PGVECTOR__DATABASE: ${POSTGRES_DATABASE:-linkportalbackend}
+  DATABASE__PGVECTOR__DATABASE: ${POSTGRES_DATABASE:-linkportal}
   DATABASE__PGVECTOR__MIN_CONNECTION: ${POSTGRES_MIN_CONNECTION:-1}
   DATABASE__PGVECTOR__MAX_CONNECTION: ${POSTGRES_MAX_CONNECTION:-10}
   LINKPORTAL_BACKEND__LLM__EMBEDDING__API_KEY: ${LINKPORTAL_BACKEND_LLM_EMBEDDING_API_KEY}
@@ -33,12 +33,12 @@ services:
     environment:
       PGUSER: ${DATABASE__SYSTEMDB__USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE__SYSTEMDB__PASSWORD:-changeit}
-      POSTGRES_DB: ${DATABASE__SYSTEMDB__DATABASE:-linkportalbackend_sysdb}
+      POSTGRES_DB: ${DATABASE__SYSTEMDB__DATABASE:-linkportal_sysdb}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - /Volumes/disk1/linkportalbackend/systemdb/data:/var/lib/postgresql/data
+      - /Volumes/disk1/linkportal/systemdb/data:/var/lib/postgresql/data
     networks:
-      - linkportalbackend
+      - linkportal
     healthcheck:
       test: [ 'CMD', 'pg_isready' ]
       interval: 1s
@@ -53,12 +53,12 @@ services:
     environment:
       PGUSER: ${DATABASE__PGVECTOR__USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE__PGVECTOR__PASSWORD:-changeit}
-      POSTGRES_DB: ${DATABASE__PGVECTOR__DATABASE:-linkportalbackend_vecdb}
+      POSTGRES_DB: ${DATABASE__PGVECTOR__DATABASE:-linkportal_vecdb}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - /Volumes/disk1/linkportalbackend/vectordb/data:/var/lib/postgresql/data
+      - /Volumes/disk1/linkportal/vectordb/data:/var/lib/postgresql/data
     networks:
-      - linkportalbackend
+      - linkportal
     healthcheck:
       test: [ 'CMD', 'pg_isready' ]
       interval: 1s
@@ -66,7 +66,7 @@ services:
       retries: 30
 
   serve:
-    image: registry.cn-shenzhen.aliyuncs.com/wl4g/linkportalbackend:latest
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/linkportal:latest
     restart: unless-stopped
     command: serve
     ports:
@@ -78,12 +78,12 @@ services:
       - redis
     volumes:
       # Mount the storage directory to the container, for example system tmp and storing user files.
-      - /Volumes/disk1/linkportalbackend/storage:/var/lib/linkportalbackend/storage
+      - /Volumes/disk1/linkportal/storage:/var/lib/linkportal/storage
     networks:
-      - linkportalbackend
+      - linkportal
 
   updater:
-    image: registry.cn-shenzhen.aliyuncs.com/wl4g/linkportalbackend:latest
+    image: registry.cn-shenzhen.aliyuncs.com/wl4g/linkportal:latest
     restart: unless-stopped
     command: updater
     environment:
@@ -93,11 +93,11 @@ services:
       - redis
     volumes:
       # Mount the storage directory to the container, for example system tmp and storing user files.
-      - /Volumes/disk1/linkportalbackend/storage:/var/lib/linkportalbackend/storage
+      - /Volumes/disk1/linkportal/storage:/var/lib/linkportal/storage
     networks:
-      - linkportalbackend
+      - linkportal
 
 networks:
-  linkportalbackend:
+  linkportal:
     driver: bridge
     internal: true

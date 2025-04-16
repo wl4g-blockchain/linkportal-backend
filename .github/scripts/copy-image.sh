@@ -43,5 +43,5 @@ function main() {
 
 # Usage example:
 # DST_REGISTRY_USERNAME=123 DST_REGISTRY_PASSWORD=456 \
-#   ./copy-image.sh linkportalbackend/linkportalbackenddb:v0.4.0 linkportalbackend-registry.cn-hangzhou.cr.aliyuncs.com
+#   ./copy-image.sh linkportal/linkportaldb:v0.4.0 linkportal-registry.cn-hangzhou.cr.aliyuncs.com
 main

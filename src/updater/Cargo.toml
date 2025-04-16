@@ -1,5 +1,5 @@
 [package]
-name = "linkportalbackend-updater"
+name = "linkportal-updater"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,9 +10,9 @@ workspace = true
 [dependencies]
 # Other modules dependencies.
 common-telemetry.workspace = true
-linkportalbackend-server.workspace = true
-linkportalbackend-types.workspace = true
-linkportalbackend-utils.workspace = true
+linkportal-server.workspace = true
+linkportal-types.workspace = true
+linkportal-utils.workspace = true
 
 # Thirdparty dependencies.
 axum.workspace = true

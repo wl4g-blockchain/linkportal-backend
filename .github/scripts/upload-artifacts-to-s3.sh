@@ -6,8 +6,8 @@ set -o pipefail
 ARTIFACTS_DIR=$1
 VERSION=$2
 AWS_S3_BUCKET=$3
-RELEASE_DIRS="releases/linkportalbackend"
-LINKPORTAL_BACKEND_REPO="wl4g/linkportalbackend"
+RELEASE_DIRS="releases/linkportal"
+LINKPORTAL_BACKEND_REPO="wl4g/linkportal"
 
 # Check if necessary variables are set.
 function check_vars() {
@@ -23,15 +23,15 @@ function check_vars() {
 # Uploads artifacts to AWS S3 bucket.
 function upload_artifacts() {
   # The bucket layout will be:
-  # releases/linkportalbackend
+  # releases/linkportal
   # ├── latest-version.txt
   # ├── latest-nightly-version.txt
   # ├── v0.1.0
-  # │   ├── linkportalbackend-darwin-amd64-pyo3-v0.1.0.sha256sum
-  # │   └── linkportalbackend-darwin-amd64-pyo3-v0.1.0.tar.gz
+  # │   ├── linkportal-darwin-amd64-pyo3-v0.1.0.sha256sum
+  # │   └── linkportal-darwin-amd64-pyo3-v0.1.0.tar.gz
   # └── v0.2.0
-  #    ├── linkportalbackend-darwin-amd64-pyo3-v0.2.0.sha256sum
-  #    └── linkportalbackend-darwin-amd64-pyo3-v0.2.0.tar.gz
+  #    ├── linkportal-darwin-amd64-pyo3-v0.2.0.sha256sum
+  #    └── linkportal-darwin-amd64-pyo3-v0.2.0.tar.gz
   find "$ARTIFACTS_DIR" -type f \( -name "*.tar.gz" -o -name "*.sha256sum" \) | while IFS= read -r file; do
     aws s3 cp \
       "$file" "s3://$AWS_S3_BUCKET/$RELEASE_DIRS/$VERSION/$(basename "$file")"
@@ -72,8 +72,8 @@ function download_artifacts_from_github() {
     RELEASES_API_RESPONSE=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/$LINKPORTAL_BACKEND_REPO/releases/latest")
 
     # Extract download URLs for the artifacts.
-    # Exclude source code archives which are typically named as 'linkportalbackend-<version>.zip' or 'linkportalbackend-<version>.tar.gz'.
-    ASSET_URLS=$(echo "$RELEASES_API_RESPONSE" | jq -r '.assets[] | select(.name | test("linkportalbackend-.*\\.(zip|tar\\.gz)$") | not) | .browser_download_url')
+    # Exclude source code archives which are typically named as 'linkportal-<version>.zip' or 'linkportal-<version>.tar.gz'.
+    ASSET_URLS=$(echo "$RELEASES_API_RESPONSE" | jq -r '.assets[] | select(.name | test("linkportal-.*\\.(zip|tar\\.gz)$") | not) | .browser_download_url')
 
     # Download each asset.
     while IFS= read -r url; do

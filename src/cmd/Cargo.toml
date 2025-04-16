@@ -1,5 +1,5 @@
 [package]
-name = "linkportalbackend-cmd"
+name = "linkportal-cmd"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -16,10 +16,10 @@ common-pprof = { workspace = true, optional = true }
 common-telemetry = { workspace = true, features = [
     "deadlock_detection",
 ] }
-linkportalbackend-server.workspace = true
-linkportalbackend-updater.workspace = true
-linkportalbackend-types.workspace = true
-linkportalbackend-utils.workspace = true
+linkportal-server.workspace = true
+linkportal-updater.workspace = true
+linkportal-types.workspace = true
+linkportal-utils.workspace = true
 
 # Thirdparty dependencies.
 #mimalloc.workspace = true
@@ -43,8 +43,8 @@ prometheus.workspace = true
 once_cell.workspace = true
 
 [[bin]]
-name = "linkportalbackend"
-path = "src/bin/linkportalbackend.rs"
+name = "linkportal"
+path = "src/bin/linkportal.rs"
 
 [build-dependencies]
 chrono.workspace = true

@@ -43,10 +43,10 @@ mod tests {
         // let default = auth::userinfo_by_name(None);
         // assert_eq!(default.username(), user_info.username());
 
-        // // In mock user provider, right username:password == "linkportalbackend:linkportalbackend"
+        // // In mock user provider, right username:password == "linkportal:linkportal"
         // let mock_user_provider = Some(Arc::new(MockUserProvider::default()) as Arc<dyn UserProvider>);
 
-        // // base64encode("linkportalbackend:linkportalbackend") == "Z3JlcHRpbWU6Z3JlcHRpbWU="
+        // // base64encode("linkportal:linkportal") == "Z3JlcHRpbWU6Z3JlcHRpbWU="
         // let req = mock_http_request(Some("Basic Z3JlcHRpbWU6Z3JlcHRpbWU="), None).unwrap();
         // let req = inner_auth(mock_user_provider.clone(), req).await.unwrap();
         // let ctx: &QueryContextRef = req.extensions().get().unwrap();

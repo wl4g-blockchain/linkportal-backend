@@ -20,8 +20,8 @@
 
 // use std::sync::Arc;
 
-// use linkportalbackend_proto::prometheus::remote::{Sample, TimeSeries};
-// use linkportalbackend_proto::prometheus::*;
+// use linkportal_proto::prometheus::remote::{Sample, TimeSeries};
+// use linkportal_proto::prometheus::*;
 // use prometheus::proto::{LabelPair, MetricFamily, MetricType};
 // use prometheus::{Encoder, TextEncoder};
 

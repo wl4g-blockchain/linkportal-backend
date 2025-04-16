@@ -24,7 +24,7 @@ pub mod standalone;
 pub mod updater;
 
 use clap::{Arg, ArgMatches, Command};
-use linkportalbackend_server::config::config;
+use linkportal_server::config::config;
 use server::WebServer;
 use standalone::StandaloneServer;
 use std::{collections::BTreeMap, sync::OnceLock};
@@ -68,7 +68,7 @@ pub fn register_subcommand_handles() -> &'static BTreeMap<&'static str, (Subcomm
 
 pub fn execute_commands_app() -> () {
     let mut app = Command::new("LinkPortalBackend Rust Serve")
-        .version(linkportalbackend_server::config::config::VERSION.as_str())
+        .version(linkportal_server::config::config::VERSION.as_str())
         .author("James Wong")
         .about(
             format!(

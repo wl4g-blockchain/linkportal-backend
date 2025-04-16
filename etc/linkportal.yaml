@@ -127,7 +127,7 @@ cache:
 appdb:
   type: "SQLITE" # Options: SQLITE|POSTGRESQL|MONGODB
   sqlite:
-    dir: "/tmp/linkportalbackend/appdb/sqlite"
+    dir: "/tmp/linkportal/appdb/sqlite"
   postgres: # App DB for PostgreSQL
     host: "127.0.0.1"
     port: 5432
@@ -139,8 +139,8 @@ appdb:
     max-connections: 10
     use-ssl: false
   mongodb:
-    url: mongodb://127.0.0.1:27017/linkportalbackend
-    database: linkportalbackend
+    url: mongodb://127.0.0.1:27017/linkportal
+    database: linkportal
 
 vecdb:
   type: "PGVECTOR" # Options: PGVECTOR

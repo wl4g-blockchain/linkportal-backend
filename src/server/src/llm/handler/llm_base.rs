@@ -21,7 +21,7 @@
 use crate::{config::config, llm::handler::llm_langchain::LangchainLLMHandler};
 use anyhow::Error;
 use lazy_static::lazy_static;
-use linkportalbackend_types::knowledge::KnowledgeUploadInfo;
+use linkportal_types::knowledge::KnowledgeUploadInfo;
 use std::{
     collections::HashMap,
     fs::File,

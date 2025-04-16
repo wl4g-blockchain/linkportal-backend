@@ -1,5 +1,5 @@
-name: Build linkportalbackend images
-description: Build and push linkportalbackend images
+name: Build linkportal images
+description: Build and push linkportal images
 inputs:
   image-registry:
     description: The image registry to store the images

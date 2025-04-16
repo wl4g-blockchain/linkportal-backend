@@ -22,7 +22,7 @@ use super::AsyncRepository;
 use crate::config::config::MongoAppDBProperties;
 use anyhow::Error;
 use async_trait::async_trait;
-use linkportalbackend_types::{PageRequest, PageResponse};
+use linkportal_types::{PageRequest, PageResponse};
 use mongodb::options::{ReadConcern, WriteConcern};
 use mongodb::{options::ClientOptions, Client, Database};
 use std::any::Any;

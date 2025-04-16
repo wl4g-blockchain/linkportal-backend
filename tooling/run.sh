@@ -263,7 +263,7 @@ function deploy::docker_compose() {
     ## Download the Compose file.
     local compose_file="${BASE_DIR}/tooling/deploy/compose/docker-compose.yml"
     if [ ! -f "$compose_file" ]; then
-        local remote_compose_file="https://raw.githubusercontent.com/wl4g/linkportalbackend/main/tooling/deploy/compose/docker-compose.yml"
+        local remote_compose_file="https://raw.githubusercontent.com/wl4g/linkportal/main/tooling/deploy/compose/docker-compose.yml"
         log "Downloading compose file from $remote_compose_file ..."
         curl -k -o $compose_file $remote_compose_file
     fi
@@ -292,18 +292,18 @@ function deploy::docker_compose::prune_all_volumes() {
     [ -z "$compose_file" ] && logErr "The docker-compose yaml is missing" && exit 1 || echo -n
 
     ## Remove the volumes only if it is the first deploy.
-    if [ -z "$($compose_cmd -f $compose_file ls | grep linkportalbackend)" ]; then
+    if [ -z "$($compose_cmd -f $compose_file ls | grep linkportal)" ]; then
         set +e
-        #docker volume rm linkportalbackend_zookeeper_data 2>/dev/null
-        #docker volume rm linkportalbackend_kafka_data 2>/dev/null
-        #docker volume rm linkportalbackend_minio_data 2>/dev/null
-        #docker volume rm linkportalbackend_mongodb_data 2>/dev/null
-        docker volume rm linkportalbackend_redis_data_0 2>/dev/null
-        docker volume rm linkportalbackend_redis_data_1 2>/dev/null
-        docker volume rm linkportalbackend_redis_data_2 2>/dev/null
-        docker volume rm linkportalbackend_redis_data_3 2>/dev/null
-        docker volume rm linkportalbackend_redis_data_4 2>/dev/null
-        docker volume rm linkportalbackend_redis_data_5 2>/dev/null
+        #docker volume rm linkportal_zookeeper_data 2>/dev/null
+        #docker volume rm linkportal_kafka_data 2>/dev/null
+        #docker volume rm linkportal_minio_data 2>/dev/null
+        #docker volume rm linkportal_mongodb_data 2>/dev/null
+        docker volume rm linkportal_redis_data_0 2>/dev/null
+        docker volume rm linkportal_redis_data_1 2>/dev/null
+        docker volume rm linkportal_redis_data_2 2>/dev/null
+        docker volume rm linkportal_redis_data_3 2>/dev/null
+        docker volume rm linkportal_redis_data_4 2>/dev/null
+        docker volume rm linkportal_redis_data_5 2>/dev/null
         set -e
     else
         logErr "Unable to remove data volumes, please shutdown all containers before, Or remove the arg '--prune-all-volumes'"
@@ -325,14 +325,14 @@ case $1 in
   build-image)
     case $2 in
         -b|--backend)
-            build::docker_image "linkportalbackend" "Dockerfile"
+            build::docker_image "linkportal" "Dockerfile"
             ;;
         -d|--initdb)
-            build::docker_image "linkportalbackend-initdb" "Dockerfile.initdb"
+            build::docker_image "linkportal-initdb" "Dockerfile.initdb"
             ;;
         -A|--all)
-            build::docker_image "linkportalbackend" "Dockerfile"
-            build::docker_image "linkportalbackend-initdb" "Dockerfile.initdb"
+            build::docker_image "linkportal" "Dockerfile"
+            build::docker_image "linkportal-initdb" "Dockerfile.initdb"
             ;;
         *)
             usages; exit 1
@@ -341,25 +341,25 @@ case $1 in
   push-image)
     case $2 in
         -b|--backend)
-            build::push_image "linkportalbackend"
+            build::push_image "linkportal"
             ;;
         -d|--initdb)
-            build::push_image "linkportalbackend-initdb"
+            build::push_image "linkportal-initdb"
             ;;
         -A|--all)
-            build::push_image "linkportalbackend"
-            build::push_image "linkportalbackend-initdb"
+            build::push_image "linkportal"
+            build::push_image "linkportal-initdb"
             ;;
         *)
             usages; exit 1
     esac
     ;;
   build-push)
-    build::docker_image "linkportalbackend" "Dockerfile"
-    build::docker_image "linkportalbackend-initdb" "Dockerfile"
-    #build::docker_image "linkportalbackend-ui" "Dockerfile.ui"
-    build:push_image "linkportalbackend"
-    build:push_image "linkportalbackend-initdb"
+    build::docker_image "linkportal" "Dockerfile"
+    build::docker_image "linkportal-initdb" "Dockerfile"
+    #build::docker_image "linkportal-ui" "Dockerfile.ui"
+    build:push_image "linkportal"
+    build:push_image "linkportal-initdb"
     ;;
   prune-image)
     tools::prune_none_image
@@ -367,7 +367,7 @@ case $1 in
   deploy-docker)
     case $2 in
         -S|--status)
-            docker ps --format "table {{.ID}} {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" | grep linkportalbackend_
+            docker ps --format "table {{.ID}} {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" | grep linkportal_
             ;;
         -U|--up)
             deploy::docker_compose "up -d" "$3"

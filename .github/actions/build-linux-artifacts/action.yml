@@ -14,7 +14,7 @@ inputs:
     description: Disable running integration tests
     required: true
   dev-mode:
-    description: Enable dev mode, only build standard linkportalbackend
+    description: Enable dev mode, only build standard linkportal
     required: false
     default: 'false'
   working-dir:
@@ -37,27 +37,27 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: sqlness-logs
-        path: /tmp/linkportalbackend-*.log
+        path: /tmp/linkportal-*.log
         retention-days: 3
 
-    - name: Build standard linkportalbackend
+    - name: Build standard linkportal
       uses: ./.github/actions/build-app-binary
       with:
         base-image: ubuntu
         features: pyo3_backend,servers/dashboard
         cargo-profile: ${{ inputs.cargo-profile }}
-        artifacts-dir: linkportalbackend-linux-${{ inputs.arch }}-pyo3-${{ inputs.version }}
+        artifacts-dir: linkportal-linux-${{ inputs.arch }}-pyo3-${{ inputs.version }}
         version: ${{ inputs.version }}
         working-dir: ${{ inputs.working-dir }}
 
-    - name: Build linkportalbackend without pyo3
+    - name: Build linkportal without pyo3
       if: ${{ inputs.dev-mode == 'false' }}
       uses: ./.github/actions/build-app-binary
       with:
         base-image: ubuntu
         features: servers/dashboard
         cargo-profile: ${{ inputs.cargo-profile }}
-        artifacts-dir: linkportalbackend-linux-${{ inputs.arch }}-${{ inputs.version }}
+        artifacts-dir: linkportal-linux-${{ inputs.arch }}-${{ inputs.version }}
         version: ${{ inputs.version }}
         working-dir: ${{ inputs.working-dir }}
 
@@ -66,23 +66,23 @@ runs:
       run: |
         rm -rf ./target/
 
-    - name: Build linkportalbackend on centos base image
+    - name: Build linkportal on centos base image
       uses: ./.github/actions/build-app-binary
       if: ${{ inputs.arch == 'amd64' && inputs.dev-mode == 'false' }} # Only build centos7 base image for amd64.
       with:
         base-image: centos
         features: servers/dashboard
         cargo-profile: ${{ inputs.cargo-profile }}
-        artifacts-dir: linkportalbackend-linux-${{ inputs.arch }}-centos-${{ inputs.version }}
+        artifacts-dir: linkportal-linux-${{ inputs.arch }}-centos-${{ inputs.version }}
         version: ${{ inputs.version }}
         working-dir: ${{ inputs.working-dir }}
 
-    - name: Build linkportalbackend on android base image
+    - name: Build linkportal on android base image
       uses: ./.github/actions/build-app-binary
       if: ${{ inputs.arch == 'amd64' && inputs.dev-mode == 'false' }} # Only build android base image on amd64.
       with:
         base-image: android
-        artifacts-dir: linkportalbackend-android-arm64-${{ inputs.version }}
+        artifacts-dir: linkportal-android-arm64-${{ inputs.version }}
         version: ${{ inputs.version }}
         working-dir: ${{ inputs.working-dir }}
         build-android-artifacts: true

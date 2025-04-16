@@ -30,7 +30,7 @@ pub mod users_sqlite;
 use crate::config::config::{AppConfigProperties, AppDBType};
 use anyhow::Error;
 use async_trait::async_trait;
-use linkportalbackend_types::{PageRequest, PageResponse};
+use linkportal_types::{PageRequest, PageResponse};
 
 #[async_trait] // solution2: async fn + dyn polymorphism problem.
 pub trait AsyncRepository<T>: Send {

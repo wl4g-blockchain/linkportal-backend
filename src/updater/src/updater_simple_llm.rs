@@ -22,7 +22,7 @@
 use super::updater_base::{ILinkPortalBackendUpdater, LinkPortalBackendAccessEvent};
 use async_trait::async_trait;
 use common_telemetry::info;
-use linkportalbackend_server::{config::config::UpdaterProperties, llm::handler::llm_base::LLMManager};
+use linkportal_server::{config::config::UpdaterProperties, llm::handler::llm_base::LLMManager};
 use std::sync::Arc;
 use tokio_cron_scheduler::{Job, JobScheduler};
 
@@ -120,7 +120,7 @@ mod tests {
     //     analyze_config.kind = SimpleLlmAnalyticsHandler::KIND.to_owned();
     //     analyze_config.name = "defaultAnalyze".to_string();
     //     analyze_config.cron = "0/10 * * * * *".to_string();
-    //     config.linkportalbackend.analytics.push(analyze_config);
+    //     config.linkportal.analytics.push(analyze_config);
 
     //     let mut llm_config = LlmProperties::default();
     //     //llm_config.api_url = "https://api.openai.com/v1/chat/completions".to_string();
@@ -128,7 +128,7 @@ mod tests {
     //     llm_config.api_key = env::var("TEST_OPENAI_KEY").ok().unwrap();
     //     //llm_config.model = "gpt-3.5-turbo".to_string();
     //     llm_config.model = "qwen-plus".to_string();
-    //     config.linkportalbackend.llm = llm_config;
+    //     config.linkportal.llm = llm_config;
 
     //     let handler = SimpleLlmAnalyticsHandler::init(analyze_config).await;
     //     handler.analyze().await;

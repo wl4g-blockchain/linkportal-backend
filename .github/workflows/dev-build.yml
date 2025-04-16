@@ -7,7 +7,7 @@ on:
       repository:
         description: The public repository to build
         required: false
-        default: wl4g/linkportalbackend
+        default: wl4g/linkportal
       commit: # Note: We only pull the source code and use the current workflow to build the artifacts.
         description: The commit to build
         required: true
@@ -77,15 +77,15 @@ env:
   NIGHTLY_RELEASE_PREFIX: nightly
 
   # Use the different image name to avoid conflict with the release images.
-  IMAGE_NAME: linkportalbackend-dev
+  IMAGE_NAME: linkportal-dev
 
-  # The source code will check out in the following path: '${WORKING_DIR}/dev/linkportalbackend'.
-  CHECKOUT_APP_PATH: dev/linkportalbackend
+  # The source code will check out in the following path: '${WORKING_DIR}/dev/linkportal'.
+  CHECKOUT_APP_PATH: dev/linkportal
 
 jobs:
   allocate-runners:
     name: Allocate runners
-    if: ${{ github.repository == 'wl4g/linkportalbackend' }}
+    if: ${{ github.repository == 'wl4g/linkportal' }}
     runs-on: ubuntu-20.04
     outputs:
       linux-amd64-runner: ${{ steps.start-linux-amd64-runner.outputs.label }}
@@ -159,7 +159,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout linkportalbackend
+      - name: Checkout linkportal
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}
@@ -172,7 +172,7 @@ jobs:
           cargo-profile: ${{ env.CARGO_PROFILE }}
           version: ${{ needs.allocate-runners.outputs.version }}
           disable-run-tests: ${{ env.DISABLE_RUN_TESTS }}
-          dev-mode: true # Only build the standard linkportalbackend binary.
+          dev-mode: true # Only build the standard linkportal binary.
           working-dir: ${{ env.CHECKOUT_APP_PATH }}
 
   build-linux-arm64-artifacts:
@@ -188,7 +188,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout linkportalbackend
+      - name: Checkout linkportal
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}
@@ -201,7 +201,7 @@ jobs:
           cargo-profile: ${{ env.CARGO_PROFILE }}
           version: ${{ needs.allocate-runners.outputs.version }}
           disable-run-tests: ${{ env.DISABLE_RUN_TESTS }}
-          dev-mode: true # Only build the standard linkportalbackend binary.
+          dev-mode: true # Only build the standard linkportal binary.
           working-dir: ${{ env.CHECKOUT_APP_PATH }}
 
   release-images-to-dockerhub:
@@ -342,4 +342,4 @@ jobs:
         if: ${{ needs.release-images-to-dockerhub.outputs.build-result != 'success' }}
         with:
           payload: |
-            {"text": "LinkPortalBackend's ${{ env.NEXT_RELEASE_VERSION }} build has failed, please check 'https://github.com/wl4g-blockchain/linkportalbackend/actions/workflows/${{ env.NEXT_RELEASE_VERSION }}-build.yml'."}
+            {"text": "LinkPortalBackend's ${{ env.NEXT_RELEASE_VERSION }} build has failed, please check 'https://github.com/wl4g-blockchain/linkportal/actions/workflows/${{ env.NEXT_RELEASE_VERSION }}-build.yml'."}

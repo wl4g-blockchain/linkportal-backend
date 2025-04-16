@@ -21,14 +21,14 @@
 use super::server::WebServer;
 use crate::cmd::management::ManagementServer;
 use clap::Command;
-use linkportalbackend_server::config::config::AppConfig;
-use linkportalbackend_server::llm::handler::llm_base::LLMManager;
-use linkportalbackend_server::{
+use linkportal_server::config::config::AppConfig;
+use linkportal_server::llm::handler::llm_base::LLMManager;
+use linkportal_server::{
     config::config::{self, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION},
     mgmt::apm,
 };
-use linkportalbackend_updater::updater_base::LinkPortalBackendUpdaterManager;
-use linkportalbackend_utils::panics::PanicHelper;
+use linkportal_updater::updater_base::LinkPortalBackendUpdaterManager;
+use linkportal_utils::panics::PanicHelper;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::oneshot;
@@ -39,7 +39,7 @@ impl StandaloneServer {
     pub const COMMAND_NAME: &'static str = "standalone";
 
     pub fn build() -> Command {
-        Command::new(Self::COMMAND_NAME).about("Run LinkPortalBackend All Components in One with Standalone.")
+        Command::new(Self::COMMAND_NAME).about("Run LinkPortal Backend All Components in One with Standalone.")
     }
 
     #[allow(unused)]

@@ -8,18 +8,18 @@ inputs:
   src-image-namespace:
     description: The namespace of the source image registry to store the images
     required: true
-    default: linkportalbackend
+    default: linkportal
   src-image-name:
     description: The name of the source image
     required: false
-    default: linkportalbackend
+    default: linkportal
   dst-image-registry:
     description: The destination image registry to store the images
     required: true
   dst-image-namespace:
     description: The namespace of the destination image registry to store the images
     required: true
-    default: linkportalbackend
+    default: linkportal
   dst-image-registry-username:
     description: The username to login to the image registry
     required: true
@@ -30,7 +30,7 @@ inputs:
     description: Version of the artifact
     required: true
   dev-mode:
-    description: Enable dev mode, only push standard linkportalbackend
+    description: Enable dev mode, only push standard linkportal
     required: false
     default: 'false'
   push-latest-tag:
@@ -94,7 +94,7 @@ runs:
             ${{ inputs.version }} \
             ${{ inputs.aws-cn-s3-bucket }}
 
-    - name: Push linkportalbackend image from Dockerhub to ACR
+    - name: Push linkportal image from Dockerhub to ACR
       shell: bash
       env:
         DST_REGISTRY_USERNAME: ${{ inputs.dst-image-registry-username }}
@@ -104,7 +104,7 @@ runs:
          ${{ inputs.src-image-registry }}/${{ inputs.src-image-namespace }}/${{ inputs.src-image-name }}:${{ inputs.version }} \
          ${{ inputs.dst-image-registry }}/${{ inputs.dst-image-namespace }}
 
-    - name: Push latest linkportalbackend image from Dockerhub to ACR
+    - name: Push latest linkportal image from Dockerhub to ACR
       shell: bash
       if: ${{ inputs.push-latest-tag == 'true' }}
       env:
@@ -115,7 +115,7 @@ runs:
          ${{ inputs.src-image-registry }}/${{ inputs.src-image-namespace }}/${{ inputs.src-image-name }}:latest \
          ${{ inputs.dst-image-registry }}/${{ inputs.dst-image-namespace }}
 
-    - name: Push linkportalbackend-centos image from DockerHub to ACR
+    - name: Push linkportal-centos image from DockerHub to ACR
       shell: bash
       if: ${{ inputs.dev-mode == 'false' }}
       env:
@@ -126,7 +126,7 @@ runs:
          ${{ inputs.src-image-registry }}/${{ inputs.src-image-namespace }}/${{ inputs.src-image-name }}-centos:latest \
          ${{ inputs.dst-image-registry }}/${{ inputs.dst-image-namespace }}
 
-    - name: Push linkportalbackend-centos image from DockerHub to ACR
+    - name: Push linkportal-centos image from DockerHub to ACR
       shell: bash
       if: ${{ inputs.dev-mode == 'false' && inputs.push-latest-tag == 'true' }}
       env:

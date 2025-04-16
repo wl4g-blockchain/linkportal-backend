@@ -26,7 +26,7 @@ use dotenv::dotenv;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use jsonwebtoken::Algorithm;
 use lazy_static::lazy_static;
-use linkportalbackend_utils::secrets::SecretHelper;
+use linkportal_utils::secrets::SecretHelper;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::{env, ops::Deref, str::FromStr, sync::Arc, time::Duration};
@@ -502,7 +502,7 @@ pub struct StaticRule {
 impl AppConfigProperties {
     pub fn default() -> AppConfigProperties {
         AppConfigProperties {
-            service_name: String::from("linkportalbackend"),
+            service_name: String::from("linkportal"),
             server: ServerProperties::default(),
             mgmt: MgmtProperties::default(),
             logging: LoggingProperties::default(),
@@ -731,7 +731,7 @@ impl Default for AppDBProperties {
 impl Default for SqliteAppDBProperties {
     fn default() -> Self {
         SqliteAppDBProperties {
-            dir: Some(String::from("/tmp/linkportalbackend/appdb/sqlite")),
+            dir: Some(String::from("/tmp/linkportal/appdb/sqlite")),
         }
     }
 }
@@ -741,8 +741,8 @@ impl Default for PostgresPropertiesBase {
         PostgresPropertiesBase {
             host: String::from("127.0.0.1"),
             port: 5432,
-            database: String::from("linkportalbackend"),
-            schema: String::from("linkportalbackend"),
+            database: String::from("linkportal"),
+            schema: String::from("linkportal"),
             username: String::from("postgres"),
             password: None,
             min_connections: Some(1),
@@ -772,7 +772,7 @@ impl Default for MongoAppDBProperties {
     fn default() -> Self {
         MongoAppDBProperties {
             url: Some(String::from("mongodb://localhost:27017")),
-            database: Some(String::from("linkportalbackend")),
+            database: Some(String::from("linkportal")),
         }
     }
 }

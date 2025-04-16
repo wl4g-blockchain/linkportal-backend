@@ -34,7 +34,7 @@ pub async fn init_profiling(options: &PyroscopeAgentOptions) {
     let agent = if options.enabled && options.enabled {
         let mut tags = Vec::new();
         tags.push(("role", "primary"));
-        //tags.push(("instance", &linkportalbackend_utils::inets::get_local_non_loopback_ip_str()));
+        //tags.push(("instance", &linkportal_utils::inets::get_local_non_loopback_ip_str()));
         // Merge tags with configuration.
         if let Some(ctags) = &options.tags {
             for (key, value) in ctags {

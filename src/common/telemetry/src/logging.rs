@@ -114,7 +114,7 @@ impl Eq for LoggingOptions {}
 impl Default for LoggingOptions {
     fn default() -> Self {
         Self {
-            dir: "./linkportalbackend/logs".to_string(),
+            dir: "./linkportal/logs".to_string(),
             level: None,
             log_format: LogFormat::Text,
             enable_otlp_tracing: false,
@@ -177,7 +177,7 @@ pub fn init_global_logging(
         let file_logging_layer = if !opts.dir.is_empty() {
             let rolling_appender = RollingFileAppender::builder()
                 .rotation(Rotation::HOURLY)
-                .filename_prefix("linkportalbackend")
+                .filename_prefix("linkportal")
                 .max_log_files(opts.max_log_files)
                 .build(&opts.dir)
                 .unwrap_or_else(|e| panic!("initializing rolling file appender at {} failed: {}", &opts.dir, e));
@@ -197,7 +197,7 @@ pub fn init_global_logging(
         let err_file_logging_layer = if !opts.dir.is_empty() {
             let rolling_appender = RollingFileAppender::builder()
                 .rotation(Rotation::HOURLY)
-                .filename_prefix("linkportalbackend-err")
+                .filename_prefix("linkportal-err")
                 .max_log_files(opts.max_log_files)
                 .build(&opts.dir)
                 .unwrap_or_else(|e| panic!("initializing rolling file appender at {} failed: {}", &opts.dir, e));
@@ -229,7 +229,7 @@ pub fn init_global_logging(
         let slow_query_logging_layer = if !opts.dir.is_empty() && opts.slow_query.enable {
             let rolling_appender = RollingFileAppender::builder()
                 .rotation(Rotation::HOURLY)
-                .filename_prefix("linkportalbackend-slow-queries")
+                .filename_prefix("linkportal-slow-queries")
                 .max_log_files(opts.max_log_files)
                 .build(&opts.dir)
                 .unwrap_or_else(|e| panic!("initializing rolling file appender at {} failed: {}", &opts.dir, e));

@@ -100,16 +100,16 @@ jobs:
         with:
           # Shares across multiple jobs
           shared-key: "build-binaries"
-      - name: Build linkportalbackend binaries
+      - name: Build linkportal binaries
         shell: bash
-        run: cargo build --bin linkportalbackend --bin sqlness-runner
-      - name: Pack linkportalbackend binaries
+        run: cargo build --bin linkportal --bin sqlness-runner
+      - name: Pack linkportal binaries
         shell: bash
         run: |
           mkdir bins && \
-          mv ./target/debug/linkportalbackend bins && \
+          mv ./target/debug/linkportal bins && \
           mv ./target/debug/sqlness-runner bins
-      - name: Print linkportalbackend binaries info
+      - name: Print linkportal binaries info
         run: ls -lh bins
       - name: Upload artifacts
         uses: ./.github/actions/upload-artifacts
@@ -149,7 +149,7 @@ jobs:
         run: tar -xvf ./bins.tar.gz
       - name: Run LinkPortalBackend
         run: |
-          ./bins/linkportalbackend standalone start&
+          ./bins/linkportal standalone start&
       - name: Fuzz Test
         uses: ./.github/actions/fuzz-test
         env:
@@ -181,7 +181,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sqlness-logs
-          path: /tmp/linkportalbackend-*.log
+          path: /tmp/linkportal-*.log
           retention-days: 3
 
   sqlness-kafka-wal:
@@ -211,7 +211,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sqlness-logs-with-kafka-wal
-          path: /tmp/linkportalbackend-*.log
+          path: /tmp/linkportal-*.log
           retention-days: 3
 
   fmt:

@@ -24,9 +24,9 @@ use async_trait::async_trait;
 use super::sqlite::SQLiteRepository;
 use super::AsyncRepository;
 use crate::config::config::SqliteAppDBProperties;
-use linkportalbackend_types::user::User;
-use linkportalbackend_types::PageRequest;
-use linkportalbackend_types::PageResponse;
+use linkportal_types::user::User;
+use linkportal_types::PageRequest;
+use linkportal_types::PageResponse;
 
 pub struct UserSQLiteRepository {
     inner: SQLiteRepository<User>,

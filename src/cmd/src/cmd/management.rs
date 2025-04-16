@@ -21,7 +21,7 @@
 use crate::apm;
 use axum::{routing::get, Router};
 use axum_prometheus::PrometheusMetricLayer;
-use linkportalbackend_server::{config::config::AppConfig, mgmt};
+use linkportal_server::{config::config::AppConfig, mgmt};
 use common_telemetry::info;
 use std::sync::Arc;
 use tokio::{sync::oneshot, task::JoinHandle};

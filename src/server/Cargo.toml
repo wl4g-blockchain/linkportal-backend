@@ -1,5 +1,5 @@
 [package]
-name = "linkportalbackend-server"
+name = "linkportal-server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,8 +10,8 @@ workspace = true
 [dependencies]
 # Other modules dependencies.
 common-audit-log = { workspace = true }
-linkportalbackend-types.workspace = true
-linkportalbackend-utils.workspace = true
+linkportal-types.workspace = true
+linkportal-utils.workspace = true
 
 # Thridparty dependencies.
 axum.workspace = true

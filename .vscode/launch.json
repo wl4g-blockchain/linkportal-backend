@@ -34,14 +34,14 @@
                     "deadlock_detection,profiling-mem-prof,profiling-pprof,profiling-tokio-console,profiling-pyroscope"
                 ],
                 "filter": {
-                    "name": "linkportalbackend",
+                    "name": "linkportal",
                     "kind": "bin"
                 },
             },
             "env": {
                 "MALLOC_CONF": "prof:true,lg_prof_interval:28", // Set the stack trace sampling interval of jemalloc to bytes, e.g. 28 about is 256 MB
                 "RUST_BACKTRACE": "full",
-                "LINKPORTAL_BACKEND_CFG_PATH": "${workspaceFolder}/etc/linkportalbackend.yaml",
+                "LINKPORTAL_BACKEND_CFG_PATH": "${workspaceFolder}/etc/linkportal.yaml",
                 //"LINKPORTAL_BACKEND_CFG_VERBOSE": "true"
             },
             "args": [

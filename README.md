@@ -54,25 +54,25 @@ cargo build --target aarch64-apple-darwin
 cargo build --target x86_64-unknown-linux-gnu
 
 # Run LinkPortalBackend
-./target/debug/linkportalbackend
+./target/debug/linkportal
 ```
 
 ### Building & Run with image
 
 ```bash
-docker build --platform=amd64 -t registry.cn-shenzhen.aliyuncs.com/wl4g/linkportalbackend:latest .
+docker build --platform=amd64 -t registry.cn-shenzhen.aliyuncs.com/wl4g/linkportal:latest .
 ```
 
 ### Run with Docker
 
 ```bash
 docker run -d \
---name linkportalbackend \
+--name linkportal \
 --restart unless-stopped \
 --security-opt seccomp=unconfined \
 -p 9000:9000 \
 -e RUST_BACKTRACE=full \
-registry.cn-shenzhen.aliyuncs.com/wl4g/linkportalbackend:latest
+registry.cn-shenzhen.aliyuncs.com/wl4g/linkportal:latest
 ```
 
 ### Verify LinkPortalBackend via directly

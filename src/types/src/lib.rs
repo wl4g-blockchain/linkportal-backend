@@ -30,7 +30,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use validator::Validate;
 
-use linkportalbackend_utils::snowflake::SnowflakeIdGenerator;
+use linkportal_utils::snowflake::SnowflakeIdGenerator;
 // use sqlx::{ Decode, FromRow };
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, FromRow, utoipa::ToSchema)]

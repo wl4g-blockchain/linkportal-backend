@@ -27,7 +27,7 @@ use std::path::Path;
 use super::AsyncRepository;
 use crate::config::config::SqliteAppDBProperties;
 use async_trait::async_trait;
-use linkportalbackend_types::{PageRequest, PageResponse};
+use linkportal_types::{PageRequest, PageResponse};
 use sqlx::{migrate::MigrateDatabase, Pool, Sqlite, SqlitePool};
 use tracing::{debug, info};
 
@@ -214,7 +214,7 @@ macro_rules! dynamic_sqlite_query {
 macro_rules! dynamic_sqlite_insert {
     ($bean:expr, $table:expr, $pool:expr) => {
         {
-            use linkportalbackend_utils::types::GenericValue;
+            use linkportal_utils::types::GenericValue;
             use crate::util::auths::SecurityContext;
 
             let insert_by = SecurityContext::get_instance().get_current_uname_for_store().await;
@@ -293,7 +293,7 @@ macro_rules! dynamic_sqlite_insert {
 macro_rules! dynamic_sqlite_update {
     ($bean:expr, $table:expr, $pool:expr) => {
         {
-            use linkportalbackend_utils::types::GenericValue;
+            use linkportal_utils::types::GenericValue;
             use crate::util::auths::SecurityContext;
 
             let update_by = SecurityContext::get_instance().get_current_uname_for_store().await;

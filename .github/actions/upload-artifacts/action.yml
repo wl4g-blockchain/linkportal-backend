@@ -26,10 +26,10 @@ runs:
         cp ${{ inputs.target-file }} ${{ inputs.artifacts-dir }}
 
     # The compressed artifacts will use the following layout:
-    # linkportalbackend-linux-amd64-pyo3-v0.3.0sha256sum
-    # linkportalbackend-linux-amd64-pyo3-v0.3.0.tar.gz
-    #   linkportalbackend-linux-amd64-pyo3-v0.3.0
-    #   └── linkportalbackend
+    # linkportal-linux-amd64-pyo3-v0.3.0sha256sum
+    # linkportal-linux-amd64-pyo3-v0.3.0.tar.gz
+    #   linkportal-linux-amd64-pyo3-v0.3.0
+    #   └── linkportal
     - name: Compress artifacts and calculate checksum
       working-directory: ${{ inputs.working-dir }}
       shell: bash

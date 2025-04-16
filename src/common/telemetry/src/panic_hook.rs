@@ -27,7 +27,7 @@ use lazy_static::lazy_static;
 use prometheus::*;
 
 lazy_static! {
-    pub static ref PANIC_COUNTER: IntCounter = register_int_counter!("linkportalbackend_panic_counter", "panic_counter").unwrap();
+    pub static ref PANIC_COUNTER: IntCounter = register_int_counter!("linkportal_panic_counter", "panic_counter").unwrap();
 }
 
 pub fn set_panic_hook() {

@@ -18,9 +18,9 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use linkportalbackend_cmd::cmd;
+use linkportal_cmd::cmd;
 
-// Check for the allocator used: 'objdump -t target/debug/linkportalbackend | grep mi_os_alloc'
+// Check for the allocator used: 'objdump -t target/debug/linkportal | grep mi_os_alloc'
 // see:https://rustcc.cn/article?id=75f290cd-e8e9-4786-96dc-9a44e398c7f5
 // #[global_allocator]
 // static GLOBAL: std::alloc::System = std::alloc::System;

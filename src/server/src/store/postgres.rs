@@ -22,7 +22,7 @@ use super::AsyncRepository;
 use crate::config::config::PostgresAppDBProperties;
 use anyhow::Error;
 use async_trait::async_trait;
-use linkportalbackend_types::{PageRequest, PageResponse};
+use linkportal_types::{PageRequest, PageResponse};
 use sqlx::migrate::MigrateDatabase;
 use sqlx::{PgPool, Postgres};
 use std::any::Any;
@@ -187,7 +187,7 @@ macro_rules! dynamic_postgres_query {
 macro_rules! dynamic_postgres_insert {
     ($bean:expr, $table:expr, $pool:expr) => {
         {
-            use linkportalbackend_utils::types::GenericValue;
+            use linkportal_utils::types::GenericValue;
             use crate::util::auths::SecurityContext;
 
             let insert_by = SecurityContext::get_instance().get_current_uname_for_store().await;
@@ -264,7 +264,7 @@ macro_rules! dynamic_postgres_insert {
 macro_rules! dynamic_postgres_update {
     ($bean:expr, $table:expr, $pool:expr) => {
         {
-            use linkportalbackend_utils::types::GenericValue;
+            use linkportal_utils::types::GenericValue;
             use crate::util::auths::SecurityContext;
 
             let update_by = SecurityContext::get_instance().get_current_uname_for_store().await;

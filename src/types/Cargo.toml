@@ -1,5 +1,5 @@
 [package]
-name = "linkportalbackend-types"
+name = "linkportal-types"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,7 +10,7 @@ workspace = true
 [dependencies]
 # Other modules dependencies.
 common-makestruct.workspace = true
-linkportalbackend-utils.workspace = true
+linkportal-utils.workspace = true
 
 # Thirdparty dependencies.
 axum.workspace = true

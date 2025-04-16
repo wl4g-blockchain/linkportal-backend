@@ -27,11 +27,11 @@ use chrono::Utc;
 use ethers::types::{Address, Signature};
 use hyper::{header, StatusCode};
 use lazy_static::lazy_static;
-use linkportalbackend_types::{
+use linkportal_types::{
     auth::{EthersWalletLoginRequest, GithubUserInfo, LogoutRequest, PasswordLoginRequest, PasswordPubKeyRequest},
     user::{SaveUserRequest, User},
 };
-use linkportalbackend_utils::rsa_ciphers::RSACipher;
+use linkportal_utils::rsa_ciphers::RSACipher;
 use openidconnect::{core::CoreUserInfoClaims, LanguageTag};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, str::FromStr, sync::Arc};

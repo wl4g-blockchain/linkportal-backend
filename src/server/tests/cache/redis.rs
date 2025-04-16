@@ -20,7 +20,7 @@
 
 #[cfg(test)]
 mod tests {
-    use linkportalbackend_server::{
+    use linkportal_server::{
         cache::{redis::StringRedisCache, ICache},
         config::config::RedisProperties,
     };
