@@ -18,7 +18,7 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use crate::updater_eth_event::EthereumEventUpdater;
+use crate::updater_ethereum_event::EthereumEventUpdater;
 use anyhow::Error;
 use async_trait::async_trait;
 use common_telemetry::info;

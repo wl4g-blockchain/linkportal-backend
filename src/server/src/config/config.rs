@@ -386,11 +386,9 @@ pub struct ServicesProperties {
     pub updaters: Vec<UpdaterProperties>,
     #[serde(rename = "llm", default = "LlmProperties::default")]
     pub llm: LlmProperties,
-    #[serde(rename = "forward", default = "ForwardProperties::default")]
-    pub forward: ForwardProperties,
 }
 
-/// ModSec rules updater based LLM, and similar design as k8s multi specification controller implementation.
+/// Chain data Updater based LLM, Supports multi different L1 chains, as well as different environment networks of the same L1 chain.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UpdaterProperties {
     #[serde(rename = "name")]
@@ -403,6 +401,19 @@ pub struct UpdaterProperties {
     pub cron: String,
     #[serde(rename = "channel-size")]
     pub channel_size: usize,
+    #[serde(rename = "ethereum")]
+    pub ethereum: EthereumUpdaterProperties,
+}
+
+/// Ethereum compatible chain updater configuration.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EthereumUpdaterProperties {
+    #[serde(rename = "chain-id")]
+    pub chain_id: u64,
+    #[serde(rename = "rpc-url")]
+    pub rpc_url: String,
+    #[serde(rename = "estate-token-addr")]
+    pub estate_token_addr: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -458,34 +469,6 @@ pub struct GenerateLLMProperties {
     pub top_p: f32,
     #[serde(rename = "system-prompt")]
     pub system_prompt: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ForwardProperties {
-    #[serde(rename = "max-body-bytes")]
-    pub max_body_bytes: usize,
-    #[serde(rename = "http-proxy")]
-    pub http_proxy: Option<String>,
-    #[serde(rename = "connect-timeout")]
-    pub connect_timeout: u64,
-    #[serde(rename = "read-timeout")]
-    pub read_timeout: u64,
-    #[serde(rename = "total-timeout")]
-    pub total_timeout: u64,
-    #[serde(rename = "verbose")]
-    pub verbose: bool,
-    // Downstream proxy server additional upstream destination header.
-    #[serde(rename = "upstream-destination-header-name")]
-    pub upstream_destination_header_name: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct StaticRule {
-    pub name: String,
-    pub kind: String, // Notice: Currently only support "RAW"
-    pub severity: String,
-    pub desc: String,
-    pub value: String,
 }
 
 // App Properties impls.
@@ -802,7 +785,6 @@ impl Default for ServicesProperties {
         ServicesProperties {
             llm: LlmProperties::default(),
             updaters: Vec::new(),
-            forward: ForwardProperties::default(),
         }
     }
 }
@@ -815,6 +797,18 @@ impl Default for UpdaterProperties {
             enabled: true,
             cron: String::from("0/30 * * * * * *"), // Every half minute
             channel_size: 200,
+            ethereum: EthereumUpdaterProperties::default(),
+        }
+    }
+}
+
+impl Default for EthereumUpdaterProperties {
+    fn default() -> Self {
+        EthereumUpdaterProperties {
+            // TODO: use Option ?
+            chain_id: 1,
+            rpc_url: String::from("https://eth-mainnet.g.alchemy.com/v2/demo"),
+            estate_token_addr: String::from("0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"),
         }
     }
 }
@@ -855,29 +849,8 @@ impl Default for GenerateLLMProperties {
             temperature: 0.1,
             top_k: 1,
             top_p: 1.0,
-            system_prompt: String::from(
-                "You are a security expert.\n\
-                 You are given a list of rules and a request.\n\
-                 You must determine if the request is safe or not.\n\
-                 If the request is safe, you must return \"safe\".\n\
-                 If the request is not safe, you must return \"unsafe\" and provide a reason.\n\
-                 You must also provide a list of rules that were used to determine the result.\n\
-                 You must also provide a list of rules that were not used to determine the result.",
-            ),
-        }
-    }
-}
-
-impl Default for ForwardProperties {
-    fn default() -> Self {
-        ForwardProperties {
-            max_body_bytes: 65535,
-            http_proxy: None,
-            connect_timeout: 5,
-            read_timeout: 5,
-            total_timeout: 10,
-            verbose: false,
-            upstream_destination_header_name: String::from("X-Upstream-Destination"),
+            // TODO: default prompt or remove it.
+            system_prompt: String::from("You are a blockchain expert. TODO TODO TODO ..."),
         }
     }
 }

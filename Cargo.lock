@@ -3957,6 +3957,7 @@ dependencies = [
  "common-telemetry",
  "config",
  "dotenv",
+ "ethers",
  "hyper 1.6.0",
  "langchain-rust",
  "lazy_static",
