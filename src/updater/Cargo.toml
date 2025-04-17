@@ -43,6 +43,7 @@ langchain-rust.workspace = true
 pgvector.workspace = true
 url.workspace = true
 ethers.workspace = true
+futures.workspace = true
 
 [build-dependencies]
 chrono.workspace = true
