@@ -29,7 +29,7 @@ use lazy_static::lazy_static;
 use linkportal_utils::secrets::SecretHelper;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, env, ops::Deref, str::FromStr, sync::Arc, time::Duration};
+use std::{env, ops::Deref, str::FromStr, sync::Arc, time::Duration};
 use validator::Validate;
 
 // Global program information.
