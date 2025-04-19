@@ -18,7 +18,7 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use crate::updater_ethereum_event::EthereumEventUpdater;
+use crate::updater_eth_txlog::EthereumEventUpdater;
 use anyhow::Error;
 use async_trait::async_trait;
 use common_telemetry::info;
@@ -30,55 +30,57 @@ use std::{
 };
 
 #[async_trait]
-pub trait ILinkPortalUpdater: Send + Sync {
+pub trait IChainTxLogUpdater: Send + Sync {
     async fn init(&self);
 }
 
 lazy_static! {
-    static ref SINGLE_INSTANCE: RwLock<LinkPortalUpdaterManager> = RwLock::new(LinkPortalUpdaterManager::new());
+    static ref SINGLE_INSTANCE: RwLock<ChainTxLogUpdaterManager> = RwLock::new(ChainTxLogUpdaterManager::new());
 }
 
-pub struct LinkPortalUpdaterManager {
-    pub implementations: HashMap<String, Arc<dyn ILinkPortalUpdater + Send + Sync>>,
+pub struct ChainTxLogUpdaterManager {
+    pub implementations: HashMap<String, Arc<dyn IChainTxLogUpdater + Send + Sync>>,
 }
 
-impl LinkPortalUpdaterManager {
+impl ChainTxLogUpdaterManager {
     fn new() -> Self {
-        LinkPortalUpdaterManager {
+        ChainTxLogUpdaterManager {
             implementations: HashMap::new(),
         }
     }
 
-    pub fn get() -> &'static RwLock<LinkPortalUpdaterManager> {
+    pub fn get() -> &'static RwLock<ChainTxLogUpdaterManager> {
         &SINGLE_INSTANCE
     }
 
     pub async fn init() {
-        info!("Register All LinkPortal updaters ...");
+        info!("Register All chain TxLog updaters ...");
 
-        for config in &config::get_config().services.updaters {
-            if !config.enabled {
-                info!("Skipping implementation updater: {}", config.name);
-                continue;
-            }
-            // TODO: Full use similar java spi provider mechanism.
-            if config.kind == EthereumEventUpdater::KIND {
-                match Self::get()
-                    .write() // If acquire fails, then it block until acquired.
-                    .unwrap() // If acquire fails, then it should panic.
-                    .register(config.kind.to_owned(), EthereumEventUpdater::new(config).await)
-                {
-                    Ok(registered) => {
-                        info!("Initializing LinkPortal Updater ...");
-                        let _ = registered.init().await;
+        if let Some(updaters) = &config::get_config().services.updaters {
+            for config in updaters {
+                if !config.enabled {
+                    info!("Skipping implementation updater: {}", config.name);
+                    continue;
+                }
+                // TODO: Full use similar java spi provider mechanism.
+                if config.kind == EthereumEventUpdater::KIND {
+                    match Self::get()
+                        .write() // If acquire fails, then it block until acquired.
+                        .unwrap() // If acquire fails, then it should panic.
+                        .register(config.kind.to_owned(), EthereumEventUpdater::new(config).await)
+                    {
+                        Ok(registered) => {
+                            info!("Initializing LinkPortal Updater ...");
+                            let _ = registered.init().await;
+                        }
+                        Err(e) => panic!("Failed to register LinkPortal Updater: {}", e),
                     }
-                    Err(e) => panic!("Failed to register LinkPortal Updater: {}", e),
                 }
             }
         }
     }
 
-    fn register<T: ILinkPortalUpdater + Send + Sync + 'static>(
+    fn register<T: IChainTxLogUpdater + Send + Sync + 'static>(
         &mut self,
         name: String,
         handler: Arc<T>,
@@ -91,9 +93,9 @@ impl LinkPortalUpdaterManager {
         Ok(handler)
     }
 
-    pub async fn get_implementation(name: String) -> Result<Arc<dyn ILinkPortalUpdater + Send + Sync>, Error> {
+    pub async fn get_implementation(name: String) -> Result<Arc<dyn IChainTxLogUpdater + Send + Sync>, Error> {
         // If the read lock is poisoned, the program will panic.
-        let this = LinkPortalUpdaterManager::get().read().unwrap();
+        let this = ChainTxLogUpdaterManager::get().read().unwrap();
         if let Some(implementation) = this.implementations.get(&name) {
             Ok(implementation.to_owned())
         } else {

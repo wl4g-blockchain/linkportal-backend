@@ -18,4 +18,4 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-pub mod eth_block_subscribe;
+pub mod eth_txlog_subscribe;

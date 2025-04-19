@@ -156,13 +156,44 @@ vecdb:
     use-ssl: false
 
 services:
-  # Chain transaction event data Analysis updater based LLM.
+  # Chain transaction event data Analysis updater.
   updaters:
-    - name: "defaultEthEventUpdater"
-      kind: "ETH_EVENT"
+    - kind: "ETHEREUM_TX_LOG"
+      name: "mainnetEthTxLogUpdater"
       enabled: true
       cron: "0 * * * * *"
-      channel-size: 200
+      channel-size: 100
+      network-id: "1"
+      http-rpc-url: "https://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
+      ws-rpc-url: "wss://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
+      abi-path: "/tmp/UniswapV2Factory.json"
+      contract-addrs:
+        - "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419" # e.g: Uniswap V2 factory contract.
+      filters:
+        - PairCreated
+    # - kind: "ETHEREUM_TX_LOG"
+    #   name: "sepoliaEthTxLogUpdater"
+    #   enabled: true
+    #   cron: "0 * * * * *"
+    #   channel-size: 100
+    #   network-id: "11155111" # see:https://chainlist.org/chain/11155111?testnets=true
+    #   http-rpc-url: "https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #   ws-rpc-url: "wss://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #   contract-addrs:
+    #     - "0x..."
+    #   filters: {}
+    # - kind: "SOLANA_TX_LOG"
+    #   name: "mainnetSolTxLogUpdater"
+    #   enabled: true
+    #   cron: "0 * * * * *"
+    #   channel-size: 100
+    #   network-id: "mainnet"
+    #   http-rpc-url: "https://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #   ws-rpc-url: "wss://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #   contract-addrs:
+    #     - "0x..."
+    #   filters: {}
+
   # see:https://platform.openai.com/docs/guides/completions
   # see:https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion
   # see:https://help.aliyun.com/zh/model-studio/getting-started/what-is-model-studio#16693d2e3fmir
@@ -190,10 +221,4 @@ services:
       top-p: 0.9
       system-prompt: |-
         You are a block chain security expert.
-        You are given a list of rules and a request.
-        You must determine if the request is safe or not.
-        If the request is safe, you must return "safe".
-        If the request is not safe, you must return "unsafe" and provide a reason.
-        You must also provide a list of rules that were used to determine the result.
-        You must also providea list of rules that were not used to determine the result.
 

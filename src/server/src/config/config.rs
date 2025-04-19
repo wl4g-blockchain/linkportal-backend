@@ -29,7 +29,7 @@ use lazy_static::lazy_static;
 use linkportal_utils::secrets::SecretHelper;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::{env, ops::Deref, str::FromStr, sync::Arc, time::Duration};
+use std::{collections::HashMap, env, ops::Deref, str::FromStr, sync::Arc, time::Duration};
 use validator::Validate;
 
 // Global program information.
@@ -383,7 +383,7 @@ pub struct PgVectorDBProperties {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServicesProperties {
     #[serde(rename = "updaters")]
-    pub updaters: Vec<UpdaterProperties>,
+    pub updaters: Option<Vec<UpdaterProperties>>,
     #[serde(rename = "llm", default = "LlmProperties::default")]
     pub llm: LlmProperties,
 }
@@ -391,29 +391,35 @@ pub struct ServicesProperties {
 /// Chain data Updater based LLM, Supports multi different L1 chains, as well as different environment networks of the same L1 chain.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UpdaterProperties {
-    #[serde(rename = "name")]
-    pub name: String,
     #[serde(rename = "kind")]
     pub kind: String,
+    #[serde(rename = "name")]
+    pub name: String,
     #[serde(rename = "enabled")]
     pub enabled: bool,
     #[serde(rename = "cron")]
-    pub cron: String,
+    pub cron: String, // e.g: 0/30 * * * * * *
     #[serde(rename = "channel-size")]
-    pub channel_size: usize,
-    #[serde(rename = "ethereum")]
-    pub ethereum: EthereumUpdaterProperties,
+    pub channel_size: usize, // e.g: 200
+    #[serde(rename = "chain")]
+    pub chain: GenericChainProperties,
 }
 
-/// Ethereum compatible chain updater configuration.
+/// Generic chain updater properties.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct EthereumUpdaterProperties {
+pub struct GenericChainProperties {
     #[serde(rename = "chain-id")]
-    pub chain_id: u64,
-    #[serde(rename = "rpc-url")]
-    pub rpc_url: String,
-    #[serde(rename = "estate-token-addr")]
-    pub estate_token_addr: String,
+    pub chain_id: String, // e.g: 1
+    #[serde(rename = "http-rpc-url")]
+    pub http_rpc_url: String, // e.g: https://eth-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>
+    #[serde(rename = "ws-rpc-url")]
+    pub ws_rpc_url: String, // e.g: wss://eth-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>
+    #[serde(rename = "contract-addrs")]
+    pub contract_addres: Vec<String>, // e.g: ["0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"]
+    #[serde(rename = "abi-path")]
+    pub abi_path: String, // e.g: '/etc/linkportal/abi/ethereum/UniswapV2Factory.json'
+    #[serde(rename = "filters")]
+    pub filters: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -783,32 +789,8 @@ impl Deref for PgVectorDBProperties {
 impl Default for ServicesProperties {
     fn default() -> Self {
         ServicesProperties {
+            updaters: None,
             llm: LlmProperties::default(),
-            updaters: Vec::new(),
-        }
-    }
-}
-
-impl Default for UpdaterProperties {
-    fn default() -> Self {
-        UpdaterProperties {
-            name: String::from("default"),
-            kind: String::from("SIMPLE_LLM"),
-            enabled: true,
-            cron: String::from("0/30 * * * * * *"), // Every half minute
-            channel_size: 200,
-            ethereum: EthereumUpdaterProperties::default(),
-        }
-    }
-}
-
-impl Default for EthereumUpdaterProperties {
-    fn default() -> Self {
-        EthereumUpdaterProperties {
-            // TODO: use Option ?
-            chain_id: 1,
-            rpc_url: String::from("https://eth-mainnet.g.alchemy.com/v2/demo"),
-            estate_token_addr: String::from("0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"),
         }
     }
 }

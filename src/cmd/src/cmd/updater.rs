@@ -26,7 +26,7 @@ use linkportal_server::config::config::{self, GIT_BUILD_DATE, GIT_COMMIT_HASH, G
 use linkportal_server::context::state::LinkPortalState;
 use linkportal_server::llm::handler::llm_base::LLMManager;
 use linkportal_server::mgmt::{apm, health::init as health_router};
-use linkportal_updater::updater_base::LinkPortalUpdaterManager;
+use linkportal_updater::updater_base::ChainTxLogUpdaterManager;
 use linkportal_utils::panics::PanicHelper;
 use linkportal_utils::tokio_signal::tokio_graceful_shutdown_signal;
 use std::env;
@@ -70,7 +70,7 @@ impl LinkPortalUpdaterServer {
     #[allow(unused)]
     async fn start(config: &Arc<AppConfig>, verbose: bool) {
         LLMManager::init().await;
-        LinkPortalUpdaterManager::init().await;
+        ChainTxLogUpdaterManager::init().await;
 
         let app_state = LinkPortalState::new(&config).await;
 

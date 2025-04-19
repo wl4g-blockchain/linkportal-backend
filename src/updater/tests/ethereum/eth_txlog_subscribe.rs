@@ -83,15 +83,14 @@ pub mod tests {
         ));
 
         // 6. Start up the HTTP block poller for lost persist blocks.
-        // let poll_task = tokio::spawn(http_block_poller(
-        //     contracts.to_owned(),
-        //     provider_http.clone(),
-        //     db_pool.clone(),
-        //     last_block,
-        // ));
+        let poll_task = tokio::spawn(http_block_poller(
+            contracts.to_owned(),
+            provider_http.clone(),
+            db_pool.clone(),
+            last_block,
+        ));
 
-        // let result = tokio::try_join!(ws_task, poll_task)?;
-        let result = tokio::try_join!(ws_task)?;
+        let result = tokio::try_join!(ws_task, poll_task)?;
         Ok(())
     }
 

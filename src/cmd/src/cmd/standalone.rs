@@ -27,7 +27,7 @@ use linkportal_server::{
     config::config::{self, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION},
     mgmt::apm,
 };
-use linkportal_updater::updater_base::LinkPortalUpdaterManager;
+use linkportal_updater::updater_base::ChainTxLogUpdaterManager;
 use linkportal_utils::panics::PanicHelper;
 use std::env;
 use std::sync::Arc;
@@ -68,7 +68,7 @@ impl StandaloneServer {
     #[allow(unused)]
     async fn start(config: &Arc<AppConfig>, verbose: bool) {
         LLMManager::init().await;
-        LinkPortalUpdaterManager::init().await;
+        ChainTxLogUpdaterManager::init().await;
         WebServer::start(config, verbose, None, None).await;
     }
 

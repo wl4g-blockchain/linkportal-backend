@@ -19,4 +19,4 @@
 // This includes modifications and derived works.
 
 pub mod updater_base;
-pub mod updater_ethereum_event;
+pub mod updater_eth_txlog;
