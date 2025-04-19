@@ -18,7 +18,7 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use crate::updater_eth_txlog::EthereumEventUpdater;
+use crate::updater_eth_txlog::EthereumTxLogUpdater;
 use anyhow::Error;
 use async_trait::async_trait;
 use common_telemetry::info;
@@ -63,11 +63,11 @@ impl ChainTxLogUpdaterManager {
                     continue;
                 }
                 // TODO: Full use similar java spi provider mechanism.
-                if config.kind == EthereumEventUpdater::KIND {
+                if config.kind == EthereumTxLogUpdater::KIND {
                     match Self::get()
                         .write() // If acquire fails, then it block until acquired.
                         .unwrap() // If acquire fails, then it should panic.
-                        .register(config.kind.to_owned(), EthereumEventUpdater::new(config).await)
+                        .register(config.kind.to_owned(), EthereumTxLogUpdater::new(config).await)
                     {
                         Ok(registered) => {
                             info!("Initializing LinkPortal Updater ...");

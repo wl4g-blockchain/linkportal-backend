@@ -18,7 +18,6 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-// use openai::chat::{ChatCompletion, ChatCompletionMessage, ChatCompletionMessageRole};
 use super::updater_base::IChainTxLogUpdater;
 use async_trait::async_trait;
 use common_telemetry::{error, info, warn};
@@ -39,7 +38,7 @@ pub struct SyncCheckpoint {
     last_processed_block: i64,
 }
 
-// The DB record for each chain event.
+// The DB record for eth chain event.
 #[derive(Debug)]
 pub struct EthereumEventRecord {
     block_number: u64,
@@ -57,17 +56,17 @@ pub struct EthContractSpec {
 }
 
 #[derive(Clone)]
-pub struct EthereumEventUpdater {
+pub struct EthereumTxLogUpdater {
     config: Arc<UpdaterProperties>,
     scheduler: Arc<JobScheduler>,
 }
 
-impl EthereumEventUpdater {
+impl EthereumTxLogUpdater {
     pub const KIND: &'static str = "ETHEREUM_TX_LOG";
     pub const FILTER_EVENT_NAME: &'static str = "eventName";
 
     pub async fn new(config: &UpdaterProperties) -> Arc<Self> {
-        // Create the this updater handler instance.
+        // Create the this Ethereum compatible TxLog updater instance.
         Arc::new(Self {
             config: Arc::new(config.to_owned()),
             scheduler: Arc::new(JobScheduler::new_with_channel_size(config.channel_size).await.unwrap()),
@@ -75,7 +74,7 @@ impl EthereumEventUpdater {
     }
 
     pub(super) async fn update(&self) {
-        info!("Updating Ethereum chain TxLog ...");
+        info!("Updating Ethereum compatible chain TxLog ...");
         todo!()
     }
 
@@ -523,7 +522,7 @@ impl EthereumEventUpdater {
 }
 
 #[async_trait]
-impl IChainTxLogUpdater for EthereumEventUpdater {
+impl IChainTxLogUpdater for EthereumTxLogUpdater {
     // start async thread job to re-scaning near real-time recorded access events.
     async fn init(&self) {
         let this = self.clone();
@@ -540,7 +539,7 @@ impl IChainTxLogUpdater for EthereumEventUpdater {
             }
         };
 
-        info!("Starting Analytics handler with cron '{}'", cron);
+        info!("Starting Ethereum updater with cron '{}'", cron);
         let job = Job::new_async(cron, move |_uuid, _lock| {
             let that = this.clone();
             Box::pin(async move {
@@ -553,8 +552,7 @@ impl IChainTxLogUpdater for EthereumEventUpdater {
         self.scheduler.start().await.unwrap();
 
         info!("Started Simple LLM Analytics handler.");
-        // Notice: It's will keep the program running
-        // tokio::signal::ctrl_c().await.unwrap();
+        // tokio::signal::ctrl_c().await.unwrap(); // Notice: It's will keep the program running.
     }
 }
 

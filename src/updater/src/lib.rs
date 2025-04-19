@@ -20,3 +20,4 @@
 
 pub mod updater_base;
 pub mod updater_eth_txlog;
+pub mod updater_sol_txlog;
