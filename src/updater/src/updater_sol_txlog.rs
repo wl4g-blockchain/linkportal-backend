@@ -51,7 +51,6 @@ impl SolanaTxLogUpdater {
 
 #[async_trait]
 impl IChainTxLogUpdater for SolanaTxLogUpdater {
-    // start async thread job to re-scaning near real-time recorded access events.
     async fn init(&self) {
         let this = self.clone();
 
@@ -79,7 +78,7 @@ impl IChainTxLogUpdater for SolanaTxLogUpdater {
         self.scheduler.add(job).await.unwrap();
         self.scheduler.start().await.unwrap();
 
-        info!("Started Simple LLM Analytics handler.");
+        info!("Started Solana TxLog Updater.");
         // tokio::signal::ctrl_c().await.unwrap(); // Notice: It's will keep the program running.
     }
 }

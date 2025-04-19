@@ -19,18 +19,19 @@
 // This includes modifications and derived works.
 
 use super::updater_base::IChainTxLogUpdater;
+use anyhow::Ok;
 use async_trait::async_trait;
 use common_telemetry::{error, info, warn};
 use ethers::{
     abi::{Abi, RawLog},
     providers::{Http, Middleware, Provider, StreamExt, Ws},
-    types::{BlockNumber, Log, TransactionReceipt, H160, U64},
+    types::{Log, TransactionReceipt, H160, U64},
 };
 use futures::future::join_all;
 use linkportal_server::config::config::UpdaterProperties;
 use serde_json::{json, Value};
 use sqlx::PgPool;
-use std::{fs::File, io::BufReader, sync::Arc, time::Duration};
+use std::{fs::File, io::BufReader, sync::Arc};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 #[derive(Debug, sqlx::FromRow)]
@@ -59,6 +60,7 @@ pub struct EthContractSpec {
 pub struct EthereumTxLogUpdater {
     config: Arc<UpdaterProperties>,
     scheduler: Arc<JobScheduler>,
+    contract_specs: Arc<Vec<EthContractSpec>>,
 }
 
 impl EthereumTxLogUpdater {
@@ -66,78 +68,52 @@ impl EthereumTxLogUpdater {
     pub const FILTER_EVENT_NAME: &'static str = "eventName";
 
     pub async fn new(config: &UpdaterProperties) -> Arc<Self> {
+        let chain_config = config.chain.to_owned();
+
+        let abi: Abi = serde_json::from_reader(BufReader::new(
+            File::open(&chain_config.abi_path).expect("Failed to read ABI file"),
+        ))
+        .expect("Failed to read ABI from JSON");
+
+        let contract_specs = chain_config
+            .contract_addres
+            .iter()
+            .map(|addr| EthContractSpec {
+                address: addr.parse().unwrap(),
+                abi: abi.to_owned(),
+                filter_events: chain_config.filters.to_owned().unwrap_or_default(),
+            })
+            .collect();
+
         // Create the this Ethereum compatible TxLog updater instance.
         Arc::new(Self {
             config: Arc::new(config.to_owned()),
             scheduler: Arc::new(JobScheduler::new_with_channel_size(config.channel_size).await.unwrap()),
+            contract_specs: Arc::new(contract_specs),
         })
     }
 
     pub(super) async fn update(&self) {
         info!("Updating Ethereum compatible chain TxLog ...");
-        todo!()
-    }
 
-    #[allow(unused)]
-    async fn fetch_events(
-        &self,
-        from_block: BlockNumber,
-        to_block: BlockNumber,
-    ) -> anyhow::Result<Vec<EthereumEventRecord>, anyhow::Error> {
-        let this = Arc::new(self.to_owned());
-
-        // TODO: Initialize the database pool.
-        let db_pool = PgPool::connect("postgres://postgres:123456@jw-mac-pro.local:35432/linkportal").await?;
-        // TODO: Initialize the tables.
-        self.init_db(&db_pool).await?;
-
-        // Initialize the Ethereum RPC providers.
-        let provider_ws = Arc::new(
-            Provider::<Ws>::connect("wss://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD").await?,
+        let provider_http = Arc::new(
+            Provider::<Http>::try_from(&self.config.chain.http_rpc_url).expect("Failed to create HTTP provider"),
         );
-        let provider_http = Arc::new(Provider::<Http>::try_from(
-            "https://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD",
-        )?);
 
-        // Load the contract configurations.
-        let contract_specs = Arc::new(self.load_contract_specs()?);
+        // TODO: Remove the Initialize the database pool.
+        let db_pool = PgPool::connect("postgres://postgres:123456@jw-mac-pro.local:35432/linkportal")
+            .await
+            .expect("Failed to create database pool");
+        // TODO: Remove the Initialize the tables.
+        self.init_db(&db_pool)
+            .await
+            .expect("Failed to initialize the database pool");
 
         // Load the last persist checkpoint.
-        let last_block = self.load_checkpoint(&db_pool).await?;
-
-        // Start up the WS block listener
-        let ws_task = {
-            let that = Arc::clone(&this);
-            let db_pool_ws = db_pool.clone(); // Clone for WS task
-            let contracts_ws = Arc::clone(&contract_specs); // Clone for WS task
-            tokio::spawn(async move {
-                if let Err(e) = that
-                    .ws_block_listener(contracts_ws, provider_ws.clone(), db_pool_ws, last_block)
-                    .await
-                {
-                    error!("WS block listener error: {:?}", e);
-                }
-            })
-        };
-
-        // Start up the HTTP block poller for lost persist blocks.
-        let poll_task = {
-            let that = Arc::clone(&this);
-            let contracts_http = Arc::clone(&contract_specs); // Clone for HTTP task
-            let db_pool_http = db_pool.clone(); // Clone for HTTP task
-            tokio::spawn(async move {
-                if let Err(e) = that
-                    .http_block_poller(contracts_http, provider_http.clone(), db_pool_http, last_block)
-                    .await
-                {
-                    error!("HTTP block poller error: {:?}", e);
-                }
-            })
-        };
-
-        let result = tokio::try_join!(ws_task, poll_task)?;
-
-        todo!()
+        let last_block = self.load_checkpoint(&db_pool).await.expect("Failed to load checkpoint");
+        if let Err(e) = self.http_block_poller(provider_http.clone(), db_pool, last_block).await {
+            error!("Failed to http poll update block TxLog: {:?}", e);
+        }
     }
 
     async fn init_db(&self, pool: &PgPool) -> anyhow::Result<()> {
@@ -201,31 +177,6 @@ impl EthereumTxLogUpdater {
         Ok(())
     }
 
-    fn read_abi_from_json(&self, path: &str) -> anyhow::Result<Abi> {
-        let file = File::open(path)?;
-        let reader = BufReader::new(file);
-        let abi: Abi = serde_json::from_reader(reader)?;
-        Ok(abi)
-    }
-
-    fn load_contract_specs(&self) -> anyhow::Result<Vec<EthContractSpec>, anyhow::Error> {
-        let chain_config = self.config.chain.to_owned();
-
-        let contract_specs = chain_config
-            .contract_addres
-            .iter()
-            .map(|addr| EthContractSpec {
-                address: addr.parse().unwrap(),
-                abi: self
-                    .read_abi_from_json(&chain_config.abi_path)
-                    .expect("Failed to read ABI from JSON"),
-                filter_events: chain_config.filters.to_owned().unwrap_or_default(),
-            })
-            .collect();
-
-        Ok(contract_specs)
-    }
-
     async fn load_checkpoint(&self, pool: &PgPool) -> anyhow::Result<u64> {
         let checkpoint =
             sqlx::query_as::<_, SyncCheckpoint>("SELECT last_processed_block FROM checkpoints WHERE id = 1")
@@ -235,14 +186,32 @@ impl EthereumTxLogUpdater {
         Ok(checkpoint.map(|c| c.last_processed_block as u64).unwrap_or(0))
     }
 
-    async fn ws_block_listener(
-        &self,
-        contract_specs: Arc<Vec<EthContractSpec>>,
-        provider: Arc<Provider<Ws>>,
-        db_pool: PgPool,
-        last_block: u64,
-    ) -> anyhow::Result<()> {
-        let mut block_stream = provider.subscribe_blocks().await?;
+    async fn ws_block_listener(&self) {
+        // TODO: Remove the Initialize the database pool.
+        let db_pool = PgPool::connect("postgres://postgres:123456@jw-mac-pro.local:35432/linkportal")
+            .await
+            .expect("Failed to create database pool");
+        // TODO: Remove the Initialize the tables.
+        self.init_db(&db_pool)
+            .await
+            .expect("Failed to initialize the database pool");
+
+        // Initialize the Ethereum RPC providers.
+        let provider_ws = Arc::new(
+            Provider::<Ws>::connect(self.config.chain.ws_rpc_url.as_str())
+                .await
+                .map_err(|e| anyhow::anyhow!("Failed to create WebSocket provider: {}", e))
+                .expect("Failed to create WebSocket provider"),
+        );
+
+        // Load the last persist checkpoint.
+        let last_block = self.load_checkpoint(&db_pool).await.expect("Failed to load checkpoint");
+
+        // Start up the WS block listener
+        let mut block_stream = provider_ws
+            .subscribe_blocks()
+            .await
+            .expect("Failed to subscribe to blocks with WebSocket");
 
         while let Some(block) = block_stream.next().await {
             if let Some(block_number) = block.number {
@@ -254,116 +223,81 @@ impl EthereumTxLogUpdater {
 
                 // Fetch transaction receipts for the block.
                 let receipts = self
-                    .fetch_block_receipts_with_ws(contract_specs.to_owned(), provider.to_owned(), block_number)
-                    .await?;
+                    .fetch_block_receipts_with_ws(provider_ws.to_owned(), block_number)
+                    .await
+                    .expect("Failed to fetch block receipts with WebSocket");
 
-                // Handle the logs in the transaction receipts
-                let mut events = Vec::new();
-                for receipt in receipts {
-                    for log in receipt.logs {
-                        if let Some(event) = self.parse_log_as_event(log.to_owned(), contract_specs.to_owned()).await {
-                            events.push(event);
+                match self
+                    .handle_block_recipts(receipts, last_block, db_pool.to_owned())
+                    .await
+                {
+                    anyhow::Result::Ok(_) => match self.save_checkpoint(&db_pool, last_block).await {
+                        anyhow::Result::Ok(_) => {
+                            self.save_checkpoint(&db_pool, last_block)
+                                .await
+                                .expect("Failed to save checkpoint");
                         }
+                        Err(e) => {
+                            error!("Error processing block {}: {:?}", last_block, e);
+                            continue;
+                        }
+                    },
+                    Err(e) => {
+                        error!("Error processing block {}: {:?}", last_block, e);
+                        continue;
                     }
                 }
-
-                // Persist the All event to DB.
-                if !events.is_empty() {
-                    self.save_events_batch(&db_pool, events).await?;
-                }
-
-                // 处理链重组
-                self.handle_reorg(&db_pool, block_number.as_u64()).await?;
-
-                // Save events to the database
-                self.save_checkpoint(&db_pool, block_number.as_u64()).await?;
             }
         }
-        Ok(())
     }
 
     async fn http_block_poller(
         &self,
-        contract_specs: Arc<Vec<EthContractSpec>>,
         provider: Arc<Provider<Http>>,
         db_pool: PgPool,
         mut last_block: u64,
     ) -> anyhow::Result<()> {
-        let mut interval = tokio::time::interval(Duration::from_secs(15));
+        let current_block = provider.get_block_number().await?.as_u64();
 
-        loop {
-            interval.tick().await;
+        // Handle the missing blocks
+        while last_block < current_block {
+            last_block += 1;
+            info!("Processing the missing eth block number: {}", last_block);
 
-            let current_block = provider.get_block_number().await?.as_u64();
+            // Fetch transaction receipts for the block.
+            let receipts = self
+                .fetch_block_receipts_with_http(provider.clone(), last_block.into())
+                .await?;
 
-            // Handle the missing blocks
-            while last_block < current_block {
-                last_block += 1;
-                info!("Processing the missing eth block number: {}", last_block);
-
-                // Fetch transaction receipts for the block.
-                let receipts = self
-                    .fetch_block_receipts_with_http(contract_specs.to_owned(), provider.clone(), last_block.into())
-                    .await?;
-
-                // Handle the logs in the transaction receipts.
-                let mut events = Vec::new();
-                for receipt in receipts {
-                    for log in receipt.logs {
-                        if let Some(event) = self.parse_log_as_event(log.clone(), contract_specs.to_owned()).await {
-                            events.push(event);
-                        }
+            match self
+                .handle_block_recipts(receipts, last_block, db_pool.to_owned())
+                .await
+            {
+                anyhow::Result::Ok(_) => match self.save_checkpoint(&db_pool, last_block).await {
+                    anyhow::Result::Ok(_) => {
+                        self.save_checkpoint(&db_pool, last_block).await?;
                     }
-                }
-
-                // Persist the All event to DB.
-                if !events.is_empty() {
-                    match self.save_events_batch(&db_pool, events).await {
-                        Ok(_) => match self.save_checkpoint(&db_pool, last_block).await {
-                            Ok(_) => {
-                                self.save_checkpoint(&db_pool, last_block).await?;
-                            }
-                            Err(e) => {
-                                error!("Error processing block {}: {:?}", last_block, e);
-                                break;
-                            }
-                        },
-                        Err(e) => {
-                            error!("Error processing block {}: {:?}", last_block, e);
-                            break;
-                        }
-                    }
-                }
-
-                // 处理链重组
-                match self.handle_reorg(&db_pool, last_block).await {
-                    Ok(_) => {}
                     Err(e) => {
                         error!("Error processing block {}: {:?}", last_block, e);
                         break;
                     }
+                },
+                Err(e) => {
+                    error!("Error processing block {}: {:?}", last_block, e);
+                    break;
                 }
             }
         }
+
+        todo!()
     }
 
-    // Obtain the tx receipts in block with WebSocket
+    /// Obtain the tx receipts in block with WebSocket
     async fn fetch_block_receipts_with_ws(
         &self,
-        contract_specs: Arc<Vec<EthContractSpec>>,
         provider: Arc<Provider<Ws>>,
         block_number: U64,
     ) -> anyhow::Result<Vec<TransactionReceipt>> {
-        // 获取区块中的所有日志
-        let logs = provider
-            .get_logs(
-                &ethers::types::Filter::new()
-                    .address(contract_specs.get(0).unwrap().address)
-                    .from_block(block_number),
-            )
-            .await
-            .unwrap();
-
         let block = provider
             .get_block_with_txs(block_number)
             .await?
@@ -385,10 +319,9 @@ impl EthereumTxLogUpdater {
         Ok(receipts)
     }
 
-    // Obtain the tx receipts in block with HTTP
+    /// Obtain the tx receipts in block with HTTP
     async fn fetch_block_receipts_with_http(
         &self,
-        contract_specs: Arc<Vec<EthContractSpec>>,
         provider: Arc<Provider<Http>>,
         block_number: U64,
     ) -> anyhow::Result<Vec<TransactionReceipt>> {
@@ -413,13 +346,51 @@ impl EthereumTxLogUpdater {
         Ok(receipts)
     }
 
-    async fn parse_log_as_event(
+    async fn handle_block_recipts(
         &self,
-        log: Log,
-        contract_specs: Arc<Vec<EthContractSpec>>,
-    ) -> Option<EthereumEventRecord> {
+        receipts: Vec<TransactionReceipt>,
+        block_number: u64,
+        db_pool: PgPool,
+    ) -> anyhow::Result<(), anyhow::Error> {
+        // Handle the logs in the transaction receipts.
+        let mut events = Vec::new();
+        for receipt in receipts {
+            for log in receipt.logs {
+                if let Some(event) = self.parse_log_as_event(log.to_owned()).await {
+                    events.push(event);
+                }
+            }
+        }
+
+        // Persist the All event to DB.
+        if !events.is_empty() {
+            match self.save_events_batch(&db_pool, events).await {
+                anyhow::Result::Ok(_) => match self.save_checkpoint(&db_pool, block_number).await {
+                    anyhow::Result::Ok(_) => {
+                        self.save_checkpoint(&db_pool, block_number).await?;
+                    }
+                    Err(e) => {
+                        error!("Error process persist with block {}: {:?}", block_number, e);
+                        return Err(e.into());
+                    }
+                },
+                Err(e) => {
+                    error!("Error process persist with block {}: {:?}", block_number, e);
+                    return Err(e.into());
+                }
+            }
+        }
+
+        // Handle the chain transaction rollback.
+        match self.handle_rollback(&db_pool, block_number).await {
+            anyhow::Result::Ok(_) => Ok(()),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    async fn parse_log_as_event(&self, log: Log) -> Option<EthereumEventRecord> {
         // 查找匹配的合约配置
-        let contract_config = contract_specs.iter().find(|c| c.address == log.address)?;
+        let contract_config = self.contract_specs.iter().find(|c| c.address == log.address)?;
         // TODO: Assumption matched it.
         // let contract_config = contracts.get(0)?;
 
@@ -439,7 +410,7 @@ impl EthereumTxLogUpdater {
 
         // 将日志解析为动态JSON值
         let abi_log = match abi_event.parse_log(raw_log) {
-            Ok(log) => log,
+            anyhow::Result::Ok(log) => log,
             Err(e) => {
                 error!("Failed to parse log: {:?}", e);
                 return None;
@@ -450,7 +421,7 @@ impl EthereumTxLogUpdater {
         let mut event_map = serde_json::Map::new();
         for (event_param, log_param) in abi_event.inputs.iter().zip(abi_log.params) {
             let value = match serde_json::to_value(&log_param.value) {
-                Ok(v) => v,
+                anyhow::Result::Ok(v) => v,
                 Err(_) => json!(format!("{:?}", &log_param.value)),
             };
             event_map.insert(event_param.name.to_owned(), value);
@@ -490,8 +461,7 @@ impl EthereumTxLogUpdater {
         Ok(())
     }
 
-    // 处理链重组
-    async fn handle_reorg(&self, pool: &PgPool, new_block_number: u64) -> anyhow::Result<()> {
+    async fn handle_rollback(&self, pool: &PgPool, new_block_number: u64) -> anyhow::Result<()> {
         // 删除比新区块号更大的所有区块数据
         let deleted = sqlx::query("DELETE FROM contract_events WHERE block_number > $1")
             .bind(new_block_number as i64)
@@ -523,13 +493,12 @@ impl EthereumTxLogUpdater {
 
 #[async_trait]
 impl IChainTxLogUpdater for EthereumTxLogUpdater {
-    // start async thread job to re-scaning near real-time recorded access events.
     async fn init(&self) {
         let this = self.clone();
 
         // Pre-check the cron expression is valid.
         let cron = match Job::new_async(self.config.cron.as_str(), |_uuid, _lock| Box::pin(async {})) {
-            Ok(_) => self.config.cron.as_str(),
+            anyhow::Result::Ok(_) => self.config.cron.as_str(),
             Err(e) => {
                 warn!(
                     "Invalid cron expression '{}': {}. Using default '0/30 * * * * *'",
@@ -551,7 +520,9 @@ impl IChainTxLogUpdater for EthereumTxLogUpdater {
         self.scheduler.add(job).await.unwrap();
         self.scheduler.start().await.unwrap();
 
-        info!("Started Simple LLM Analytics handler.");
+        self.ws_block_listener().await;
+
+        info!("Started Ethereum TxLog Updater.");
         // tokio::signal::ctrl_c().await.unwrap(); // Notice: It's will keep the program running.
     }
 }

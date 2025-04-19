@@ -21,11 +21,11 @@
 use crate::{
     cache::{memory::StringMemoryCache, redis::StringRedisCache, CacheContainer},
     config::config::{AppConfig, AppDBType},
-    llm::handler::llm_base::{ILLMHandler, LLMManager},
     mgmt::health::{MongoChecker, RedisClusterChecker, SQLiteChecker},
-    store::{
+    modules::llm::handler::llm_base::{ILLMHandler, LLMManager},
+    store::RepositoryContainer,
+    sys::store::{
         users_mongo::UserMongoRepository, users_postgresql::UserPostgresRepository, users_sqlite::UserSQLiteRepository,
-        RepositoryContainer,
     },
 };
 use linkportal_types::user::User;
