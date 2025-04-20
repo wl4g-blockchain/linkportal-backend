@@ -19,18 +19,16 @@
 // This includes modifications and derived works.
 
 pub mod api_v1;
-pub mod auth;
-pub mod knowledge;
-pub mod user;
+pub mod modules;
+pub mod sys;
 
 use anyhow::Error;
 use chrono::Utc;
 use hyper::StatusCode;
+use linkportal_utils::snowflake::SnowflakeIdGenerator;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use validator::Validate;
-
-use linkportal_utils::snowflake::SnowflakeIdGenerator;
 // use sqlx::{ Decode, FromRow };
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, FromRow, utoipa::ToSchema)]
@@ -142,11 +140,7 @@ pub struct PageResponse {
 
 impl PageResponse {
     pub fn new(total: Option<i64>, num: Option<u32>, limit: Option<u32>) -> Self {
-        Self {
-            total: total,
-            num: num,
-            limit,
-        }
+        Self { total, num, limit }
     }
 }
 

@@ -57,18 +57,20 @@ impl ChainTxLogUpdaterManager {
         info!("Register All chain TxLog updaters ...");
 
         if let Some(updaters) = &config::get_config().services.updaters {
-            for config in updaters {
-                if !config.enabled {
-                    info!("Skipping implementation updater: {}", config.name);
+            for updater_config in updaters {
+                if !updater_config.enabled {
+                    info!("Skipping implementation updater: {}", updater_config.name);
                     continue;
                 }
                 // TODO: Full use similar java spi provider mechanism.
-                if config.kind == EthereumTxLogUpdater::KIND {
+                if updater_config.kind == EthereumTxLogUpdater::KIND {
                     match Self::get()
                         .write() // If acquire fails, then it block until acquired.
                         .unwrap() // If acquire fails, then it should panic.
-                        .register(config.kind.to_owned(), EthereumTxLogUpdater::new(config).await)
-                    {
+                        .register(
+                            updater_config.kind.to_owned(),
+                            EthereumTxLogUpdater::new(config::get_config().to_owned(), updater_config).await,
+                        ) {
                         Ok(registered) => {
                             info!("Initializing LinkPortal Updater ...");
                             let _ = registered.init().await;

@@ -28,8 +28,8 @@ use ethers::types::{Address, Signature};
 use hyper::{header, StatusCode};
 use lazy_static::lazy_static;
 use linkportal_types::{
-    auth::{EthersWalletLoginRequest, GithubUserInfo, LogoutRequest, PasswordLoginRequest, PasswordPubKeyRequest},
-    user::{SaveUserRequest, User},
+    sys::auth::{EthersWalletLoginRequest, GithubUserInfo, LogoutRequest, PasswordLoginRequest, PasswordPubKeyRequest},
+    sys::user::{SaveUserRequest, User},
 };
 use linkportal_utils::rsa_ciphers::RSACipher;
 use openidconnect::{core::CoreUserInfoClaims, LanguageTag};

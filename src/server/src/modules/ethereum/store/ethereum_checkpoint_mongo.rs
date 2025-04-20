@@ -25,55 +25,59 @@ use crate::{dynamic_mongo_insert, dynamic_mongo_query, dynamic_mongo_update};
 use anyhow::Error;
 use async_trait::async_trait;
 use common_telemetry::info;
-use linkportal_types::user::User;
+use linkportal_types::modules::ethereum::ethereum_checkpoint::EthEventCheckpoint;
 use linkportal_types::{PageRequest, PageResponse};
 use mongodb::bson::doc;
 use mongodb::Collection;
 use std::sync::Arc;
 
-pub struct UserMongoRepository {
+pub struct EthereumCheckpointMongoRepository {
     #[allow(unused)]
-    inner: Arc<MongoRepository<User>>,
-    collection: Collection<User>,
+    inner: Arc<MongoRepository<EthEventCheckpoint>>,
+    collection: Collection<EthEventCheckpoint>,
 }
 
-impl UserMongoRepository {
+impl EthereumCheckpointMongoRepository {
     pub async fn new(config: &MongoAppDBProperties) -> Result<Self, Error> {
         let inner = Arc::new(MongoRepository::new(config).await?);
-        let collection = inner.get_database().collection("users");
-        Ok(UserMongoRepository { inner, collection })
+        let collection = inner.get_database().collection("ch_ethereum_checkpoint");
+        Ok(EthereumCheckpointMongoRepository { inner, collection })
     }
 }
 
 #[async_trait]
-impl AsyncRepository<User> for UserMongoRepository {
-    async fn select(&self, user: User, page: PageRequest) -> Result<(PageResponse, Vec<User>), Error> {
-        //let result = &self.inner.select(user, page).await;
-        match dynamic_mongo_query!(user, self.collection, "update_time", page, User) {
+impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointMongoRepository {
+    async fn select(
+        &self,
+        checkpoint: EthEventCheckpoint,
+        page: PageRequest,
+    ) -> Result<(PageResponse, Vec<EthEventCheckpoint>), Error> {
+        //let result = &self.inner.select(checkpoint, page).await;
+        match dynamic_mongo_query!(checkpoint, self.collection, "update_time", page, EthEventCheckpoint) {
             Ok(result) => {
-                info!("query users: {:?}", result);
+                info!("query ch_ethereum_checkpoint: {:?}", result);
                 Ok((result.0, result.1))
             }
             Err(error) => Err(error),
         }
     }
 
-    async fn select_by_id(&self, id: i64) -> Result<User, Error> {
+    async fn select_by_id(&self, id: i64) -> Result<EthEventCheckpoint, Error> {
         let filter = doc! { "id": id };
-        let user = self
+        let checkpoint = self
             .collection
             .find_one(filter)
             .await?
-            .ok_or_else(|| Error::msg("User not found"))?;
-        Ok(user)
+            .ok_or_else(|| Error::msg("Ethereum checkpoint not found"))?;
+        Ok(checkpoint)
     }
 
-    async fn insert(&self, mut user: User) -> Result<i64, Error> {
-        dynamic_mongo_insert!(user, self.collection)
+    async fn insert(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
+        dynamic_mongo_insert!(checkpoint, self.collection)
     }
 
-    async fn update(&self, mut user: User) -> Result<i64, Error> {
-        dynamic_mongo_update!(user, self.collection)
+    async fn update(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
+        dynamic_mongo_update!(checkpoint, self.collection)
     }
 
     async fn delete_all(&self) -> Result<u64, Error> {

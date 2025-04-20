@@ -23,7 +23,7 @@ use std::sync::Arc;
 use anyhow::{Error, Ok};
 use async_trait::async_trait;
 use common_audit_log::audit_log;
-use linkportal_types::user::{DeleteUserRequest, QueryUserRequest, SaveUserRequest, SaveUserRequestWith, User};
+use linkportal_types::sys::user::{DeleteUserRequest, QueryUserRequest, SaveUserRequest, SaveUserRequestWith, User};
 use linkportal_types::{BaseBean, PageRequest, PageResponse};
 
 use crate::context::state::LinkPortalState;

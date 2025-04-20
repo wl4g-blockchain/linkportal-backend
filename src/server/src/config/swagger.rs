@@ -20,7 +20,7 @@
 
 use super::config::{self, AppConfig};
 use crate::modules::llm::route::knowledge_router::__path_handle_knowledge_upload;
-use linkportal_types::knowledge::KnowledgeUploadInfo;
+use linkportal_types::modules::llm::knowledge::KnowledgeUploadInfo;
 use std::collections::BTreeMap;
 use utoipa::openapi::{PathItem, Paths};
 use utoipa::OpenApi;

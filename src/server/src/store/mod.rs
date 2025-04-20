@@ -30,7 +30,7 @@ use async_trait::async_trait;
 use linkportal_types::{PageRequest, PageResponse};
 
 #[async_trait] // solution2: async fn + dyn polymorphism problem.
-pub trait AsyncRepository<T>: Send {
+pub trait AsyncRepository<T>: Send + Sync {
     // solution1: async fn + dyn polymorphism problem.
     // fn select(&self) -> Box<dyn Future<Output = Result<Page<T>, Error>> + Send>;
     async fn select(&self, mut param: T, page: PageRequest) -> Result<(PageResponse, Vec<T>), Error>
@@ -103,3 +103,18 @@ where
         }
     }
 }
+
+// Extension trait to adapt RepositoryContainer into AsyncRepository
+// trait IntoAsyncRepo<T> {
+//     fn into_async_repo(self) -> Box<dyn AsyncRepository<T> + Send + Sync>;
+// }
+
+// impl<T> IntoAsyncRepo<T> for RepositoryContainer<T>
+// where
+//     T: BaseBean,
+//     RepositoryContainer<T>: AsyncRepository<T> + Send + Sync + 'static,
+// {
+//     fn into_async_repo(self) -> Box<dyn AsyncRepository<T> + Send + Sync> {
+//         Box::new(self)
+//     }
+// }

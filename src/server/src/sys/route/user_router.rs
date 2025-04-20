@@ -29,9 +29,9 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use linkportal_types::user::{DeleteUserRequest, QueryUserRequest, SaveUserRequest, User};
+use linkportal_types::sys::user::{DeleteUserRequest, QueryUserRequest, SaveUserRequest, User};
 use linkportal_types::{
-    user::{DeleteUserResponse, QueryUserResponse, SaveUserRequestWith, SaveUserResponse},
+    sys::user::{DeleteUserResponse, QueryUserResponse, SaveUserRequestWith, SaveUserResponse},
     PageRequest, RespBase,
 };
 

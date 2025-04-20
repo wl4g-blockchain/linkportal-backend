@@ -294,13 +294,13 @@ pub mod tests {
         }
     }
 
-    // 获取区块中的所有收据 with WebSocket
+    /// Obtain the receipts in the block with WebSocket.
     async fn fetch_block_receipts_with_ws(
         contracts: Arc<Vec<ContractConfig>>,
         provider: Arc<Provider<Ws>>,
         block_number: U64,
     ) -> anyhow::Result<Vec<TransactionReceipt>> {
-        // 获取区块中的所有日志
+        // TODO: Obtain the tx event/logs by filter.
         let logs = provider
             .get_logs(
                 &ethers::types::Filter::new()
@@ -309,6 +309,8 @@ pub mod tests {
             )
             .await
             .unwrap();
+
+        let receipts = provider.get_block_receipts(block_number).await?;
 
         let block = provider
             .get_block_with_txs(block_number)

@@ -18,7 +18,7 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-use super::{BaseBean, PageResponse};
+use crate::{BaseBean, PageResponse};
 use common_makestruct::MakeStructWith;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
@@ -96,7 +96,6 @@ impl<'r> FromRow<'r, SqliteRow> for User {
 }
 
 /// Postgres Row impl for User.
-
 impl<'r> FromRow<'r, PgRow> for User {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
         Ok(User {

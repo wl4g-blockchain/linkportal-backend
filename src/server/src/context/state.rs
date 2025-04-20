@@ -20,19 +20,32 @@
 
 use crate::{
     cache::{memory::StringMemoryCache, redis::StringRedisCache, CacheContainer},
-    config::config::{AppConfig, AppDBType},
+    config::config::{AppConfig, AppDBProperties, AppDBType},
     mgmt::health::{MongoChecker, RedisClusterChecker, SQLiteChecker},
-    modules::llm::handler::llm_base::{ILLMHandler, LLMManager},
+    modules::{
+        ethereum::store::{
+            ethereum_checkpoint_mongo::EthereumCheckpointMongoRepository,
+            ethereum_checkpoint_postgresql::EthereumCheckpointPostgresRepository,
+            ethereum_checkpoint_sqlite::EthereumCheckpointSQLiteRepository,
+            ethereum_event_mongo::EthereumEventMongoRepository,
+            ethereum_event_postgresql::EthereumEventPostgresRepository,
+            ethereum_event_sqlite::EthereumEventSQLiteRepository,
+        },
+        llm::handler::llm_base::{ILLMHandler, LLMManager},
+    },
     store::RepositoryContainer,
     sys::store::{
         users_mongo::UserMongoRepository, users_postgresql::UserPostgresRepository, users_sqlite::UserSQLiteRepository,
     },
 };
-use linkportal_types::user::User;
+use linkportal_types::{
+    modules::ethereum::{ethereum_checkpoint::EthEventCheckpoint, ethereum_event::EthTransactionEvent},
+    sys::user::User,
+};
 use linkportal_utils::httpclients;
 use oauth2::basic::BasicClient;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 
 #[derive(Clone)]
 pub struct LinkPortalState {
@@ -50,6 +63,8 @@ pub struct LinkPortalState {
     pub user_repo: Arc<Mutex<RepositoryContainer<User>>>,
     // The Service Module repositories.
     pub llm_handler: Arc<dyn ILLMHandler + Send + Sync>,
+    pub eth_event_repo: Arc<RwLock<RepositoryContainer<EthTransactionEvent>>>,
+    pub eth_checkpoint_repo: Arc<RwLock<RepositoryContainer<EthEventCheckpoint>>>,
 }
 
 impl LinkPortalState {
@@ -106,10 +121,12 @@ impl LinkPortalState {
             sqlite_checker: SQLiteChecker::new(),
             mongo_checker: MongoChecker::new(),
             redis_cluster_checker: RedisClusterChecker::new(),
-            // The System repositories.
+            // The System Module repositories.
             user_repo: Arc::new(Mutex::new(user_repo)),
-            // The Application repositories.
+            // The Service Module repositories.
             llm_handler: LLMManager::get_default_implementation(),
+            eth_event_repo: Arc::new(RwLock::new(Self::new_eth_event_repo(db_config).await)),
+            eth_checkpoint_repo: Arc::new(RwLock::new(Self::new_eth_checkpoint_repo(db_config).await)),
         };
 
         // Build DI container.
@@ -117,5 +134,57 @@ impl LinkPortalState {
         // di_container.bind::<dyn IUserHandler>().to::<UserHandler>()?;
 
         app_state
+    }
+
+    pub async fn new_eth_event_repo(db_config: &AppDBProperties) -> RepositoryContainer<EthTransactionEvent> {
+        RepositoryContainer::new(
+            match db_config.db_type {
+                AppDBType::SQLITE => Some(Box::new(
+                    EthereumEventSQLiteRepository::new(&db_config.sqlite).await.unwrap(),
+                )),
+                _ => None,
+            },
+            match db_config.db_type {
+                AppDBType::POSTGRESQL => Some(Box::new(
+                    EthereumEventPostgresRepository::new(&db_config.postgres).await.unwrap(),
+                )),
+                _ => None,
+            },
+            match db_config.db_type {
+                AppDBType::MONGODB => Some(Box::new(
+                    EthereumEventMongoRepository::new(&db_config.mongodb).await.unwrap(),
+                )),
+                _ => None,
+            },
+        )
+    }
+
+    pub async fn new_eth_checkpoint_repo(db_config: &AppDBProperties) -> RepositoryContainer<EthEventCheckpoint> {
+        RepositoryContainer::new(
+            match db_config.db_type {
+                AppDBType::SQLITE => Some(Box::new(
+                    EthereumCheckpointSQLiteRepository::new(&db_config.sqlite)
+                        .await
+                        .unwrap(),
+                )),
+                _ => None,
+            },
+            match db_config.db_type {
+                AppDBType::POSTGRESQL => Some(Box::new(
+                    EthereumCheckpointPostgresRepository::new(&db_config.postgres)
+                        .await
+                        .unwrap(),
+                )),
+                _ => None,
+            },
+            match db_config.db_type {
+                AppDBType::MONGODB => Some(Box::new(
+                    EthereumCheckpointMongoRepository::new(&db_config.mongodb)
+                        .await
+                        .unwrap(),
+                )),
+                _ => None,
+            },
+        )
     }
 }

@@ -23,7 +23,7 @@ use crate::context::state::LinkPortalState;
 use async_trait::async_trait;
 use axum::{extract::State, response::IntoResponse, routing::get, Router};
 use hyper::StatusCode;
-use linkportal_types::{user::User, PageRequest};
+use linkportal_types::{sys::user::User, PageRequest};
 use serde::Serialize;
 use std::collections::HashMap;
 

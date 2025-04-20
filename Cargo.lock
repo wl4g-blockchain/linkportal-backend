@@ -3937,6 +3937,7 @@ dependencies = [
  "axum 0.8.3",
  "chrono",
  "common-makestruct",
+ "ethers",
  "hyper 1.6.0",
  "linkportal-utils",
  "serde",

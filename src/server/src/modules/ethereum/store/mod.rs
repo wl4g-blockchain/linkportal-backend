@@ -18,6 +18,9 @@
 // covered by this license must also be released under the GNU GPL license.
 // This includes modifications and derived works.
 
-pub mod ethereum_mongo;
-pub mod ethereum_postgresql;
-pub mod ethereum_sqlite;
+pub mod ethereum_checkpoint_mongo;
+pub mod ethereum_checkpoint_postgresql;
+pub mod ethereum_checkpoint_sqlite;
+pub mod ethereum_event_mongo;
+pub mod ethereum_event_postgresql;
+pub mod ethereum_event_sqlite;

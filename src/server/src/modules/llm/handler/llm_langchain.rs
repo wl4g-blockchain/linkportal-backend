@@ -21,7 +21,6 @@
 use super::llm_base::ILLMHandler;
 use crate::config::config::{self, LlmProperties};
 use anyhow::{Ok, Result};
-use linkportal_types::knowledge::{KnowledgeCategory, KnowledgeStatus, KnowledgeUploadInfo};
 use langchain_rust::{
     chain::{Chain, ConversationalRetrieverChainBuilder},
     embedding::openai::OpenAiEmbedder,
@@ -36,6 +35,7 @@ use langchain_rust::{
     template_jinja2,
     vectorstore::{pgvector::StoreBuilder, Retriever, VecStoreOptions, VectorStore},
 };
+use linkportal_types::modules::llm::knowledge::{KnowledgeCategory, KnowledgeStatus, KnowledgeUploadInfo};
 use std::{
     collections::HashMap,
     fs::File,

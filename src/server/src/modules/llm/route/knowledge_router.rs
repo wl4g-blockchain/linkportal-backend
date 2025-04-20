@@ -26,7 +26,7 @@ use axum::{
     Json, Router,
 };
 use hyper::StatusCode;
-use linkportal_types::knowledge::KnowledgeUploadInfo;
+use linkportal_types::modules::llm::knowledge::KnowledgeUploadInfo;
 use sqlx::types::uuid;
 use std::fs::{self, File};
 use std::io::Write;

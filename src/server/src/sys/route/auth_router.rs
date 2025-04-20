@@ -36,7 +36,7 @@ use axum::{
 };
 use hyper::HeaderMap;
 use linkportal_types::{
-    auth::{
+    sys::auth::{
         CallbackGithubRequest, CallbackOidcRequest, EthersWalletLoginRequest, GithubUserInfo, LogoutRequest,
         PasswordLoginRequest, PasswordPubKeyRequest, PasswordPubKeyResponse,
     },
