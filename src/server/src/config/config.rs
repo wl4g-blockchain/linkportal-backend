@@ -408,8 +408,8 @@ pub struct UpdaterProperties {
 /// Generic chain updater properties.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GenericChainProperties {
-    #[serde(rename = "chain-id")]
-    pub chain_id: String, // e.g: 1
+    #[serde(rename = "network-id")]
+    pub network_id: String, // e.g: 1
     #[serde(rename = "http-rpc-url")]
     pub http_rpc_url: String, // e.g: https://eth-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>
     #[serde(rename = "ws-rpc-url")]

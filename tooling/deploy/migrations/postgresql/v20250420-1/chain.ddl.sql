@@ -28,10 +28,11 @@ CREATE TABLE IF NOT EXISTS ch_ethereum_event (
     event_name VARCHAR(255) NOT NULL,
     event_data JSONB NOT NULL,
     create_by VARCHAR(64) NULL,
-    create_time integer default current_timestamp,
+    create_time TIMESTAMP default current_timestamp,
     update_by VARCHAR(64) NULL,
-    update_time integer default current_timestamp,
-    del_flag integer not NULL default 0 UNIQUE (transaction_hash, contract_address, event_name)
+    update_time TIMESTAMP default current_timestamp,
+    del_flag integer not NULL default 0,
+    UNIQUE (transaction_hash, contract_address, event_name)
 );
 -- Create the All index for the ch_ethereum_event table.
 CREATE INDEX IF NOT EXISTS idx_ch_ethereum_event_block_number ON ch_ethereum_event (block_number);
@@ -43,8 +44,8 @@ CREATE TABLE IF NOT EXISTS ch_ethereum_checkpoint (
     id SERIAL PRIMARY KEY,
     last_processed_block BIGINT NOT NULL,
     create_by VARCHAR(64) NULL,
-    create_time integer default current_timestamp,
+    create_time TIMESTAMP default current_timestamp,
     update_by VARCHAR(64) NULL,
-    update_time integer default current_timestamp,
-    del_flag integer not NULL default 0 UNIQUE (transaction_hash, contract_address, event_name)
+    update_time TIMESTAMP default current_timestamp,
+    del_flag integer not NULL default 0
 );

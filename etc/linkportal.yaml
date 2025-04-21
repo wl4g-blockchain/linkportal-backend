@@ -125,16 +125,16 @@ cache:
     read-from-replica: true
 
 appdb:
-  type: "SQLITE" # Options: SQLITE|POSTGRESQL|MONGODB
+  type: "POSTGRESQL" # Options: SQLITE|POSTGRESQL|MONGODB
   sqlite:
     dir: "/tmp/linkportal/appdb/sqlite"
   postgres: # App DB for PostgreSQL
     host: "127.0.0.1"
-    port: 5432
-    database: "postgres"
+    port: 35432
+    database: "linkportal"
     schema: "public"
     username: postgres
-    password: "changeit"
+    password: "123456"
     min-connections: 1
     max-connections: 10
     use-ssl: false
@@ -158,41 +158,47 @@ vecdb:
 services:
   # Chain transaction event data Analysis updater.
   updaters:
-    - kind: "ETHEREUM_TX_LOG"
+    - kind: "ETHEREUM"
       name: "mainnetEthTxLogUpdater"
       enabled: true
       cron: "0 * * * * *"
       channel-size: 100
-      network-id: "1"
-      http-rpc-url: "https://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
-      ws-rpc-url: "wss://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
-      abi-path: "/tmp/UniswapV2Factory.json"
-      contract-addrs:
-        - "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419" # e.g: Uniswap V2 factory contract.
-      filters:
-        - PairCreated
-    # - kind: "ETHEREUM_TX_LOG"
+      chain:
+        network-id: "1"
+        http-rpc-url: "https://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
+        ws-rpc-url: "wss://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
+        # e.g: export LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__ABI_PATH="${workspaceFolder}/etc/abi/UniswapV2Factory.json"
+        #abi-path: "/etc/linkportal/abi/UniswapV2Factory.json"
+        contract-addrs:
+          - "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419" # e.g: Uniswap V2 factory contract.
+        filters:
+          - PairCreated
+    # - kind: "ETHEREUM"
     #   name: "sepoliaEthTxLogUpdater"
     #   enabled: true
     #   cron: "0 * * * * *"
     #   channel-size: 100
-    #   network-id: "11155111" # see:https://chainlist.org/chain/11155111?testnets=true
-    #   http-rpc-url: "https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
-    #   ws-rpc-url: "wss://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
-    #   contract-addrs:
-    #     - "0x..."
-    #   filters: {}
-    # - kind: "SOLANA_TX_LOG"
+    #   chain:
+    #     network-id: "11155111" # see:https://chainlist.org/chain/11155111?testnets=true
+    #     http-rpc-url: "https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #     ws-rpc-url: "wss://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #     abi-path: "/etc/linkportal/abi/UniswapV2Factory.json"
+    #     contract-addrs:
+    #       - "0x..."
+    #     filters: []
+    # - kind: "SOLANA"
     #   name: "mainnetSolTxLogUpdater"
     #   enabled: true
     #   cron: "0 * * * * *"
     #   channel-size: 100
-    #   network-id: "mainnet"
-    #   http-rpc-url: "https://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
-    #   ws-rpc-url: "wss://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
-    #   contract-addrs:
-    #     - "0x..."
-    #   filters: {}
+    #   chain:
+    #     network-id: "mainnet"
+    #     http-rpc-url: "https://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #     ws-rpc-url: "wss://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
+    #     abi-path: "/etc/linkportal/abi/<YOUR_SOLANA_CONTRACT_ABI>.json"
+    #     contract-addrs:
+    #       - "0x..."
+    #     filters: []
 
   # see:https://platform.openai.com/docs/guides/completions
   # see:https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion

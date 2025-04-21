@@ -59,7 +59,7 @@ impl ChainTxLogUpdaterManager {
         if let Some(updaters) = &config::get_config().services.updaters {
             for updater_config in updaters {
                 if !updater_config.enabled {
-                    info!("Skipping implementation updater: {}", updater_config.name);
+                    info!("Skipping implementation chain TxLog updater: {}", updater_config.name);
                     continue;
                 }
                 // TODO: Full use similar java spi provider mechanism.
@@ -101,7 +101,7 @@ impl ChainTxLogUpdaterManager {
         if let Some(implementation) = this.implementations.get(&name) {
             Ok(implementation.to_owned())
         } else {
-            let errmsg = format!("Could not obtain registered Updater '{}'.", name);
+            let errmsg = format!("Could not obtain registered TxLog Updater '{}'.", name);
             return Err(Error::msg(errmsg));
         }
     }

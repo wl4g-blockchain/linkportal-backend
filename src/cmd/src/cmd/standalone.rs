@@ -22,7 +22,7 @@ use super::server::WebServer;
 use crate::cmd::management::ManagementServer;
 use clap::Command;
 use linkportal_server::config::config::AppConfig;
-use linkportal_server::modules::llm::handler::llm_base::LLMManager;
+// use linkportal_server::modules::llm::handler::llm_base::LLMManager;
 use linkportal_server::{
     config::config::{self, GIT_BUILD_DATE, GIT_COMMIT_HASH, GIT_VERSION},
     mgmt::apm,
@@ -67,7 +67,8 @@ impl StandaloneServer {
 
     #[allow(unused)]
     async fn start(config: &Arc<AppConfig>, verbose: bool) {
-        LLMManager::init().await;
+        // TODO: Initialize LLM components if posible in the future.
+        //LLMManager::init().await;
         ChainTxLogUpdaterManager::init().await;
         WebServer::start(config, verbose, None, None).await;
     }

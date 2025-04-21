@@ -57,8 +57,7 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointSQLiteRepository 
             "update_time",
             page,
             EthEventCheckpoint
-        )
-        .unwrap();
+        )?;
 
         info!("query ch_ethereum_checkpoint: {:?}", result);
         Ok((result.0, result.1))
@@ -70,21 +69,20 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointSQLiteRepository 
         )
         .bind(id)
         .fetch_one(self.inner.get_pool())
-        .await
-        .unwrap();
+        .await?;
 
         info!("query checkpoint: {:?}", checkpoint);
         Ok(checkpoint)
     }
 
     async fn insert(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
-        let inserted_id = dynamic_sqlite_insert!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool()).unwrap();
+        let inserted_id = dynamic_sqlite_insert!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool())?;
         info!("Inserted checkpoint.id: {:?}", inserted_id);
         Ok(inserted_id)
     }
 
     async fn update(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
-        let updated_id = dynamic_sqlite_update!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool()).unwrap();
+        let updated_id = dynamic_sqlite_update!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool())?;
         info!("Updated checkpoint.id: {:?}", updated_id);
         Ok(updated_id)
     }
@@ -92,8 +90,7 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointSQLiteRepository 
     async fn delete_all(&self) -> Result<u64, Error> {
         let delete_result = sqlx::query("DELETE FROM ch_ethereum_checkpoint")
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())
@@ -103,8 +100,7 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointSQLiteRepository 
         let delete_result = sqlx::query("DELETE FROM ch_ethereum_checkpoint WHERE id = $1 and del_flag = 0")
             .bind(id)
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())

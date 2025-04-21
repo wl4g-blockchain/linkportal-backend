@@ -51,14 +51,14 @@ pub struct EthereumTxLogUpdater {
 }
 
 impl EthereumTxLogUpdater {
-    pub const KIND: &'static str = "ETHEREUM_TX_LOG";
-    // pub const FILTER_EVENT_NAME: &'static str = "eventName";
+    pub const KIND: &'static str = "ETHEREUM";
 
     pub async fn new(config: Arc<AppConfig>, updater_config: &UpdaterProperties) -> Arc<Self> {
         let chain_config = updater_config.chain.to_owned();
 
         let abi: Abi = serde_json::from_reader(BufReader::new(
-            File::open(&chain_config.abi_path).expect("Failed to read ABI file"),
+            File::open(&chain_config.abi_path)
+                .expect(format!("Failed to read ABI file: {}", &chain_config.abi_path).as_str()),
         ))
         .expect("Failed to read ABI from JSON");
 
@@ -98,10 +98,11 @@ impl EthereumTxLogUpdater {
         );
 
         // Load the last persist checkpoint.
-        let last_block = self.load_checkpoint().await.expect("Failed to load checkpoint");
-        if let Err(e) = self.http_block_poller(provider_http.clone(), last_block).await {
-            error!("Failed to http poll update block TxLog: {:?}", e);
-        }
+        // TODO: Remove this comments.
+        // let last_block = self.load_checkpoint().await.expect("Failed to load checkpoint");
+        // if let Err(e) = self.http_block_poller(provider_http.clone(), last_block).await {
+        //     error!("Failed to http poll update block TxLog: {:?}", e);
+        // }
     }
 
     async fn load_checkpoint(&self) -> anyhow::Result<u64> {
@@ -110,7 +111,11 @@ impl EthereumTxLogUpdater {
             .get(&self.config)
             .select_by_id(1) // TODO: parameter id ?
             .await;
-        Ok(checkpoint?.last_processed_block as u64)
+        // if there are no checkpoint, set the last_processed_block to 0.
+        match checkpoint {
+            std::result::Result::Ok(checkpoint) => Ok(checkpoint.last_processed_block as u64),
+            Err(_) => Ok(0),
+        }
     }
 
     async fn ws_block_listener(&self) {
@@ -411,10 +416,16 @@ impl IChainTxLogUpdater for EthereumTxLogUpdater {
                 that.update().await;
             })
         })
-        .unwrap();
+        .expect("Failed to create Ethereum TxLog updater");
 
-        self.scheduler.add(job).await.unwrap();
-        self.scheduler.start().await.unwrap();
+        self.scheduler
+            .add(job)
+            .await
+            .expect("Failed to add Ethereum TxLog updater to scheduler");
+        self.scheduler
+            .start()
+            .await
+            .expect("Failed to start Ethereum TxLog updater scheduler");
 
         self.ws_block_listener().await;
 

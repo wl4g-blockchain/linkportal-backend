@@ -47,43 +47,41 @@ impl EthereumCheckpointPostgresRepository {
 impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointPostgresRepository {
     async fn select(
         &self,
-        user: EthEventCheckpoint,
+        checkpoint: EthEventCheckpoint,
         page: PageRequest,
     ) -> Result<(PageResponse, Vec<EthEventCheckpoint>), Error> {
         let result = dynamic_postgres_query!(
-            user,
+            checkpoint,
             "ch_ethereum_checkpoint",
             self.inner.get_pool(),
             "update_time",
             page,
             EthEventCheckpoint
-        )
-        .unwrap();
+        )?;
         info!("query ch_ethereum_checkpoint: {:?}", result);
         Ok((result.0, result.1))
     }
 
     async fn select_by_id(&self, id: i64) -> Result<EthEventCheckpoint, Error> {
-        let user = sqlx::query_as::<_, EthEventCheckpoint>(
+        let checkpoint = sqlx::query_as::<_, EthEventCheckpoint>(
             "SELECT * FROM ch_ethereum_checkpoint WHERE id = $1 and del_flag = 0",
         )
         .bind(id)
         .fetch_one(self.inner.get_pool())
-        .await
-        .unwrap();
+        .await?;
 
-        info!("query user: {:?}", user);
-        Ok(user)
+        info!("query checkpoint: {:?}", checkpoint);
+        Ok(checkpoint)
     }
 
-    async fn insert(&self, mut user: EthEventCheckpoint) -> Result<i64, Error> {
-        let inserted_id = dynamic_postgres_insert!(user, "ch_ethereum_checkpoint", self.inner.get_pool()).unwrap();
-        info!("Inserted user.id: {:?}", inserted_id);
+    async fn insert(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
+        let inserted_id = dynamic_postgres_insert!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool())?;
+        info!("Inserted checkpoint.id: {:?}", inserted_id);
         Ok(inserted_id)
     }
 
-    async fn update(&self, mut user: EthEventCheckpoint) -> Result<i64, Error> {
-        let updated_id = dynamic_postgres_update!(user, "ch_ethereum_checkpoint", self.inner.get_pool()).unwrap();
+    async fn update(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
+        let updated_id = dynamic_postgres_update!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool())?;
         info!("Updated ethereum checkpoint.id: {:?}", updated_id);
         Ok(updated_id)
     }
@@ -91,8 +89,7 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointPostgresRepositor
     async fn delete_all(&self) -> Result<u64, Error> {
         let delete_result = sqlx::query("DELETE FROM ch_ethereum_checkpoint")
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())
@@ -102,8 +99,7 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointPostgresRepositor
         let delete_result = sqlx::query("DELETE FROM ch_ethereum_checkpoint WHERE id = $1 and del_flag = 0")
             .bind(id)
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())

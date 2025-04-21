@@ -42,6 +42,7 @@
                 "MALLOC_CONF": "prof:true,lg_prof_interval:28", // Set the stack trace sampling interval of jemalloc to bytes, e.g. 28 about is 256 MB
                 "RUST_BACKTRACE": "full",
                 "LINKPORTAL_CFG_PATH": "${workspaceFolder}/etc/linkportal.yaml",
+                "LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__ABI_PATH": "${workspaceFolder}/etc/abi/UniswapV2Factory.json",
                 //"LINKPORTAL_CFG_VERBOSE": "true"
             },
             "args": [

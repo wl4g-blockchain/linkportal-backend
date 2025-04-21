@@ -32,7 +32,7 @@ pub struct SolanaTxLogUpdater {
 }
 
 impl SolanaTxLogUpdater {
-    pub const KIND: &'static str = "SOLANA_TX_LOG";
+    pub const KIND: &'static str = "SOLANA";
 
     pub async fn new(config: &UpdaterProperties) -> Arc<Self> {
         // Create the this Solana compatible updater handler instance.

@@ -57,8 +57,7 @@ impl AsyncRepository<EthTransactionEvent> for EthereumEventSQLiteRepository {
             "create_time",
             page,
             EthTransactionEvent
-        )
-        .unwrap();
+        )?;
 
         info!("query ch_ethereum_event: {:?}", result);
         Ok((result.0, result.1))
@@ -69,21 +68,20 @@ impl AsyncRepository<EthTransactionEvent> for EthereumEventSQLiteRepository {
             sqlx::query_as::<_, EthTransactionEvent>("SELECT * FROM ch_ethereum_event WHERE id = $1 and del_flag = 0")
                 .bind(id)
                 .fetch_one(self.inner.get_pool())
-                .await
-                .unwrap();
+                .await?;
 
         info!("query user: {:?}", user);
         Ok(user)
     }
 
     async fn insert(&self, mut user: EthTransactionEvent) -> Result<i64, Error> {
-        let inserted_id = dynamic_sqlite_insert!(user, "ch_ethereum_event", self.inner.get_pool()).unwrap();
+        let inserted_id = dynamic_sqlite_insert!(user, "ch_ethereum_event", self.inner.get_pool())?;
         info!("Inserted user.id: {:?}", inserted_id);
         Ok(inserted_id)
     }
 
     async fn update(&self, mut user: EthTransactionEvent) -> Result<i64, Error> {
-        let updated_id = dynamic_sqlite_update!(user, "ch_ethereum_event", self.inner.get_pool()).unwrap();
+        let updated_id = dynamic_sqlite_update!(user, "ch_ethereum_event", self.inner.get_pool())?;
         info!("Updated user.id: {:?}", updated_id);
         Ok(updated_id)
     }
@@ -91,8 +89,7 @@ impl AsyncRepository<EthTransactionEvent> for EthereumEventSQLiteRepository {
     async fn delete_all(&self) -> Result<u64, Error> {
         let delete_result = sqlx::query("DELETE FROM ch_ethereum_event")
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())
@@ -102,8 +99,7 @@ impl AsyncRepository<EthTransactionEvent> for EthereumEventSQLiteRepository {
         let delete_result = sqlx::query("DELETE FROM ch_ethereum_event WHERE id = $1 and del_flag = 0")
             .bind(id)
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())
