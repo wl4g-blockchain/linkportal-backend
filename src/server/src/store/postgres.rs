@@ -238,7 +238,9 @@ macro_rules! dynamic_postgres_insert {
             //  .map(|s| s.as_str())
             //  .collect::<Vec<&str>>()
             //  .join(",");
-            let query = format!("INSERT INTO {} ({}) VALUES ({}) RETURNING id", $table, fields.join(","), values.join(","));
+            // e.g: 'INSERT INTO ch_ethereum_checkpoint ( ID, last_processed_block ) VALUES ( 2, 12345 ) ON CONFLICT ( ID ) DO UPDATE SET update_time = CURRENT_TIMESTAMP(11) RETURNING ID;'
+            let query = format!("INSERT INTO {} ({}) VALUES ({}) ON CONFLICT (id) DO UPDATE SET {} RETURNING id",
+                $table, fields.join(","), values.join(","), "update_time = CURRENT_TIMESTAMP(13)");
 
             let mut operator = sqlx::query(&query);
             for param in params.iter() {
@@ -278,20 +280,20 @@ macro_rules! dynamic_postgres_update {
             // parsed based on serde_json, so the #[serde(rename="xx")] annotation is effective.
             // 2. (MongoDB) The underlying BSON serialization is also based on serde, so using #[serde(rename="xx")] is also valid
             // TODO: It is recommended to use an ORM framework, see: https://github.com/diesel-rs/diesel
-            let id = $bean.base.id.unwrap();
-            let serialized = serde_json::to_value($bean).unwrap();
-            let obj = serialized.as_object().unwrap();
+            let id = $bean.base.id.expect("Missing the base.id");
+            let serialized = serde_json::to_value($bean).expect("Cannot serialize the bean");
+            let obj = serialized.as_object().expect("Cannot deserialize the bean");
 
             let mut fields = Vec::new();
             let mut params = Vec::new();
             for (key, value) in obj {
                 if !value.is_null() {
                     if value.is_boolean() {
-                        let v = value.as_bool().unwrap();
+                        let v = value.as_bool().expect("Cannot convert to bool");
                         fields.push(format!("{} = ?", key));
                         params.push(GenericValue::Bool(v));
                     } else if value.is_number() {
-                        let v = value.as_i64().unwrap();
+                        let v = value.as_i64().expect("Cannot convert to i64");
                         fields.push(format!("{} = ?", key));
                         params.push(GenericValue::Int64(v));
                     } else if value.is_string() {

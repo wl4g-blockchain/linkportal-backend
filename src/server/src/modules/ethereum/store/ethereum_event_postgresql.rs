@@ -47,11 +47,11 @@ impl EthereumEventPostgresRepository {
 impl AsyncRepository<EthTransactionEvent> for EthereumEventPostgresRepository {
     async fn select(
         &self,
-        user: EthTransactionEvent,
+        event: EthTransactionEvent,
         page: PageRequest,
     ) -> Result<(PageResponse, Vec<EthTransactionEvent>), Error> {
         let result = dynamic_postgres_query!(
-            user,
+            event,
             "ch_ethereum_event",
             self.inner.get_pool(),
             "create_time",
@@ -63,25 +63,25 @@ impl AsyncRepository<EthTransactionEvent> for EthereumEventPostgresRepository {
     }
 
     async fn select_by_id(&self, id: i64) -> Result<EthTransactionEvent, Error> {
-        let user =
+        let event =
             sqlx::query_as::<_, EthTransactionEvent>("SELECT * FROM ch_ethereum_event WHERE id = $1 and del_flag = 0")
                 .bind(id)
                 .fetch_one(self.inner.get_pool())
                 .await?;
 
-        info!("query user: {:?}", user);
-        Ok(user)
+        info!("query event: {:?}", event);
+        Ok(event)
     }
 
-    async fn insert(&self, mut user: EthTransactionEvent) -> Result<i64, Error> {
-        let inserted_id = dynamic_postgres_insert!(user, "ch_ethereum_event", self.inner.get_pool())?;
-        info!("Inserted user.id: {:?}", inserted_id);
+    async fn insert(&self, mut event: EthTransactionEvent) -> Result<i64, Error> {
+        let inserted_id = dynamic_postgres_insert!(event, "ch_ethereum_event", self.inner.get_pool())?;
+        info!("Inserted event.id: {:?}", inserted_id);
         Ok(inserted_id)
     }
 
-    async fn update(&self, mut user: EthTransactionEvent) -> Result<i64, Error> {
-        let updated_id = dynamic_postgres_update!(user, "ch_ethereum_event", self.inner.get_pool())?;
-        info!("Updated user.id: {:?}", updated_id);
+    async fn update(&self, mut event: EthTransactionEvent) -> Result<i64, Error> {
+        let updated_id = dynamic_postgres_update!(event, "ch_ethereum_event", self.inner.get_pool())?;
+        info!("Updated event.id: {:?}", updated_id);
         Ok(updated_id)
     }
 

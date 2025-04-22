@@ -164,11 +164,11 @@ services:
       cron: "0 * * * * *"
       channel-size: 100
       chain:
-        network-id: "1"
+        chain-id: "1"
         http-rpc-url: "https://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
         ws-rpc-url: "wss://eth-mainnet.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
         # e.g: export LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__ABI_PATH="${workspaceFolder}/etc/abi/UniswapV2Factory.json"
-        #abi-path: "/etc/linkportal/abi/UniswapV2Factory.json"
+        abi-path: "/etc/linkportal/abi/UniswapV2Factory.json"
         contract-addrs:
           - "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419" # e.g: Uniswap V2 factory contract.
         filters:
@@ -179,7 +179,7 @@ services:
     #   cron: "0 * * * * *"
     #   channel-size: 100
     #   chain:
-    #     network-id: "11155111" # see:https://chainlist.org/chain/11155111?testnets=true
+    #     chain-id: "11155111" # see:https://chainlist.org/chain/11155111?testnets=true
     #     http-rpc-url: "https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
     #     ws-rpc-url: "wss://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
     #     abi-path: "/etc/linkportal/abi/UniswapV2Factory.json"
@@ -192,7 +192,7 @@ services:
     #   cron: "0 * * * * *"
     #   channel-size: 100
     #   chain:
-    #     network-id: "mainnet"
+    #     chain-id: "mainnet"
     #     http-rpc-url: "https://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
     #     ws-rpc-url: "wss://solana-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>"
     #     abi-path: "/etc/linkportal/abi/<YOUR_SOLANA_CONTRACT_ABI>.json"

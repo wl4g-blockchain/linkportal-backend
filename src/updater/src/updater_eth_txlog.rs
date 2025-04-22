@@ -25,11 +25,11 @@ use common_telemetry::{error, info, warn};
 use ethers::{
     abi::{Abi, RawLog},
     providers::{Http, Middleware, Provider, StreamExt, Ws},
-    types::{Log, TransactionReceipt, U64},
+    types::{Address, Filter, Log, TransactionReceipt, ValueOrArray, U64},
 };
 use futures::future::join_all;
 use linkportal_server::{
-    config::config::{AppConfig, UpdaterProperties},
+    config::config::{AppConfig, EthereumChainProperties, UpdaterProperties},
     context::state::LinkPortalState,
     store::RepositoryContainer,
 };
@@ -47,6 +47,7 @@ use tokio_cron_scheduler::{Job, JobScheduler};
 pub struct EthereumTxLogUpdater {
     config: Arc<AppConfig>,
     updater_config: Arc<UpdaterProperties>,
+    chain_config: Arc<EthereumChainProperties>,
     scheduler: Arc<JobScheduler>,
     contract_specs: Arc<Vec<EthContractSpec>>,
     eth_event_repo: Arc<RwLock<RepositoryContainer<EthTransactionEvent>>>,
@@ -57,11 +58,11 @@ impl EthereumTxLogUpdater {
     pub const KIND: &'static str = "ETHEREUM";
 
     pub async fn new(config: Arc<AppConfig>, updater_config: &UpdaterProperties) -> Arc<Self> {
-        let chain_config = updater_config.chain.to_owned();
+        let chain_config = updater_config.chain.as_ethereum();
 
         let abi: Abi = serde_json::from_reader(BufReader::new(
             File::open(&chain_config.abi_path)
-                .expect(format!("Failed to read ABI file: {}", &chain_config.abi_path).as_str()),
+                .expect(format!("Failed to read ABI file: {}", chain_config.abi_path).as_str()),
         ))
         .expect("Failed to read ABI from JSON");
 
@@ -69,7 +70,7 @@ impl EthereumTxLogUpdater {
             .contract_addres
             .iter()
             .map(|addr| EthContractSpec {
-                address: addr.parse().unwrap(),
+                address: addr.parse().expect("Failed to parse contract address"),
                 abi: abi.to_owned(),
                 filter_events: chain_config.filters.to_owned().unwrap_or_default(),
             })
@@ -79,10 +80,11 @@ impl EthereumTxLogUpdater {
         Arc::new(Self {
             config: config.to_owned(),
             updater_config: Arc::new(updater_config.to_owned()),
+            chain_config: Arc::new(chain_config.to_owned()),
             scheduler: Arc::new(
                 JobScheduler::new_with_channel_size(updater_config.channel_size)
                     .await
-                    .unwrap(),
+                    .expect("Failed to create JobScheduler"),
             ),
             contract_specs: Arc::new(contract_specs),
             eth_event_repo: Arc::new(RwLock::new(LinkPortalState::new_eth_event_repo(&config.appdb).await)),
@@ -94,18 +96,9 @@ impl EthereumTxLogUpdater {
 
     pub(super) async fn update(&self) {
         info!("Updating Ethereum compatible chain TxLog ...");
-
-        let provider_http = Arc::new(
-            Provider::<Http>::try_from(&self.updater_config.chain.http_rpc_url)
-                .expect("Failed to create HTTP provider"),
-        );
-
-        // Load the last persist checkpoint.
-        // TODO: Remove this comments.
-        // let last_block = self.load_checkpoint().await.expect("Failed to load checkpoint");
-        // if let Err(e) = self.http_block_poller(provider_http.clone(), last_block).await {
-        //     error!("Failed to http poll update block TxLog: {:?}", e);
-        // }
+        if let Err(e) = self.http_block_poller().await {
+            error!("Failed to http poll update block TxLog: {:?}", e);
+        }
     }
 
     async fn load_checkpoint(&self) -> anyhow::Result<u64> {
@@ -131,7 +124,7 @@ impl EthereumTxLogUpdater {
     async fn ws_block_listener(&self) {
         // Initialize the Ethereum RPC providers.
         let provider_ws = Arc::new(
-            Provider::<Ws>::connect(self.updater_config.chain.ws_rpc_url.as_str())
+            Provider::<Ws>::connect(self.chain_config.ws_rpc_url.as_str())
                 .await
                 .map_err(|e| anyhow::anyhow!("Failed to create WebSocket provider: {}", e))
                 .expect("Failed to create WebSocket provider"),
@@ -140,73 +133,150 @@ impl EthereumTxLogUpdater {
         // Load the last persist checkpoint.
         let last_block = self.load_checkpoint().await.expect("Failed to load checkpoint");
 
-        // Start up the WS block listener
-        let mut block_stream = provider_ws
-            .subscribe_blocks()
+        // Loop listen block All transactions for the WS
+        // let mut block_stream = provider_ws
+        //     .subscribe_blocks()
+        //     .await
+        //     .expect("Failed to subscribe to blocks with WebSocket");
+        // while let Some(block) = block_stream.next().await {
+        //     if let Some(block_number) = block.number {
+        //         // Skip the blocks of already been processed.
+        //         if block_number.as_u64() <= last_block {
+        //             continue;
+        //         }
+        //         info!("Processing the subscribe eth block number: {}", block_number);
+        //         // Fetch transaction receipts for the block.
+        //         let receipts = self
+        //             .fetch_block_receipts_with_ws(provider_ws.to_owned(), block_number)
+        //             .await
+        //             .expect("Failed to fetch block receipts with WebSocket");
+        //         match self.handle_block_recipts(receipts, last_block).await {
+        //             anyhow::Result::Ok(_) => match self.save_checkpoint(last_block).await {
+        //                 anyhow::Result::Ok(_) => {
+        //                     info!("Persisted checkpoint the block: {}", block_number);
+        //                 }
+        //                 Err(e) => {
+        //                     error!("Error processing block {}: {:?}", last_block, e);
+        //                     continue;
+        //                 }
+        //             },
+        //             Err(e) => {
+        //                 error!("Error processing block {}: {:?}", last_block, e);
+        //                 continue;
+        //             }
+        //         }
+        //     }
+        // }
+
+        let mut filter = ethers::types::Filter::default();
+        filter.address = Some(ValueOrArray::Array(
+            self.contract_specs.iter().map(|c| c.address).collect(),
+        ));
+
+        let mut logs_stream = provider_ws
+            .subscribe_logs(&filter)
             .await
-            .expect("Failed to subscribe to blocks with WebSocket");
+            .expect("Failed to subscribe to Ethereum logs with WebSocket");
 
-        while let Some(block) = block_stream.next().await {
-            if let Some(block_number) = block.number {
-                // Skip the blocks of already been processed.
-                if block_number.as_u64() <= last_block {
-                    continue;
+        let mut block_number = 0;
+        let mut events = Vec::new();
+        while let Some(log) = logs_stream.next().await {
+            info!("Processing the subscribe eth log: {:?}", log);
+            // Skip the logs of already been processed.
+            block_number = log.block_number.unwrap().as_u64();
+            if block_number <= last_block {
+                continue;
+            }
+            match self.parse_log_as_event(log.to_owned()).await {
+                anyhow::Result::Ok(event) => {
+                    events.push(event);
                 }
-                info!("Processing the subscribe eth block number: {}", block_number);
-
-                // Fetch transaction receipts for the block.
-                let receipts = self
-                    .fetch_block_receipts_with_ws(provider_ws.to_owned(), block_number)
-                    .await
-                    .expect("Failed to fetch block receipts with WebSocket");
-
-                match self.handle_block_recipts(receipts, last_block).await {
-                    anyhow::Result::Ok(_) => match self.save_checkpoint(last_block).await {
-                        anyhow::Result::Ok(_) => {
-                            self.save_checkpoint(last_block)
-                                .await
-                                .expect("Failed to save checkpoint");
-                        }
-                        Err(e) => {
-                            error!("Error processing block {}: {:?}", last_block, e);
-                            continue;
-                        }
-                    },
-                    Err(e) => {
-                        error!("Error processing block {}: {:?}", last_block, e);
-                        continue;
-                    }
+                Err(e) => {
+                    error!("Error processing log {}: {:?}", block_number, e);
+                    continue;
                 }
             }
         }
+        if !events.is_empty() {
+            return;
+        }
+
+        // Persist the events to DB.
+        match self.save_events_batch(&events).await {
+            anyhow::Result::Ok(_) => match self.save_checkpoint(block_number).await {
+                anyhow::Result::Ok(_) => {
+                    info!("Persisted checkpoint the block: {}", block_number);
+                }
+                Err(e) => {
+                    error!("Error process persist with block {}: {:?}", block_number, e);
+                }
+            },
+            Err(e) => {
+                error!("Error process persist with block {}: {:?}", block_number, e);
+            }
+        };
+
+        // Handle the chain transaction rollback.
+        match self.handle_rollback(&events).await {
+            anyhow::Result::Ok(_) => {
+                info!("Finshed the handle rollback with events: {}", &events.iter().count());
+            }
+            Err(e) => {
+                info!(
+                    "Error process rollback with events: {}, {:?}",
+                    &events.iter().count(),
+                    e
+                );
+            }
+        };
     }
 
-    async fn http_block_poller(&self, provider: Arc<Provider<Http>>, mut last_block: u64) -> anyhow::Result<()> {
-        let current_block = provider.get_block_number().await?.as_u64();
+    async fn http_block_poller(&self) -> anyhow::Result<()> {
+        let provider_http = Arc::new(
+            Provider::<Http>::try_from(&self.chain_config.http_rpc_url).expect("Failed to create HTTP provider"),
+        );
+        // Load the last persist checkpoint.
+        let mut last_block = self.load_checkpoint().await.expect("Failed to load checkpoint");
 
-        // Handle the missing blocks
+        let mut events = Vec::new();
+        let current_block = provider_http.get_block_number().await?.as_u64();
+        // Handle the missing blocks.
         while last_block < current_block {
             last_block += 1;
             info!("Processing the missing eth block number: {}", last_block);
-
             // Fetch transaction receipts for the block.
-            let receipts = self
-                .fetch_block_receipts_with_http(provider.clone(), last_block.into())
-                .await?;
+            // let receipts = self
+            //     .fetch_block_receipts_with_http(provider.clone(), last_block.into())
+            //     .await?;
+            // match self.handle_block_recipts(receipts, last_block).await {
+            //     anyhow::Result::Ok(_) => match self.save_checkpoint(last_block).await {
+            //         anyhow::Result::Ok(_) => {
+            //             info!("Persisted checkpoint the block: {}", last_block);
+            //         }
+            //         Err(e) => {
+            //             error!("Error processing block {}: {:?}", last_block, e);
+            //             break;
+            //         }
+            //     },
+            //     Err(e) => {
+            //         error!("Error processing block {}: {:?}", last_block, e);
+            //         break;
+            //     }
+            // }
 
-            match self.handle_block_recipts(receipts, last_block).await {
-                anyhow::Result::Ok(_) => match self.save_checkpoint(last_block).await {
-                    anyhow::Result::Ok(_) => {
-                        self.save_checkpoint(last_block).await?;
+            let mut filter = ethers::types::Filter::default();
+            filter.address = Some(ValueOrArray::Array(
+                self.contract_specs.iter().map(|c| c.address).collect(),
+            ));
+            for log in provider_http.get_logs(&filter).await? {
+                match self.parse_log_as_event(log.to_owned()).await {
+                    anyhow::Result::Ok(event) => {
+                        events.push(event);
                     }
                     Err(e) => {
-                        error!("Error processing block {}: {:?}", last_block, e);
-                        break;
+                        error!("Error processing log {}: {:?}", last_block, e);
+                        continue;
                     }
-                },
-                Err(e) => {
-                    error!("Error processing block {}: {:?}", last_block, e);
-                    break;
                 }
             }
         }
@@ -215,130 +285,118 @@ impl EthereumTxLogUpdater {
     }
 
     /// Obtain the tx receipts in block with WebSocket
-    async fn fetch_block_receipts_with_ws(
-        &self,
-        provider: Arc<Provider<Ws>>,
-        block_number: U64,
-    ) -> anyhow::Result<Vec<TransactionReceipt>> {
-        let block = provider
-            .get_block_with_txs(block_number)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Block not found"))?;
-
-        let receipt_futures = block
-            .transactions
-            .into_iter()
-            .map(|tx| provider.get_transaction_receipt(tx.hash));
-
-        let receipts = join_all(receipt_futures)
-            .await
-            .into_iter()
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .flatten()
-            .collect();
-
-        Ok(receipts)
-    }
+    // async fn fetch_block_receipts_with_ws(
+    //     &self,
+    //     provider: Arc<Provider<Ws>>,
+    //     block_number: U64,
+    // ) -> anyhow::Result<Vec<TransactionReceipt>> {
+    //     let block = provider
+    //         .get_block_with_txs(block_number)
+    //         .await?
+    //         .ok_or_else(|| anyhow::anyhow!("Block not found"))?;
+    //     let receipt_futures = block
+    //         .transactions
+    //         .into_iter()
+    //         .map(|tx| provider.get_transaction_receipt(tx.hash));
+    //     let receipts = join_all(receipt_futures)
+    //         .await
+    //         .into_iter()
+    //         .collect::<Result<Vec<_>, _>>()?
+    //         .into_iter()
+    //         .flatten()
+    //         .collect();
+    //     Ok(receipts)
+    // }
 
     /// Obtain the tx receipts in block with HTTP
-    async fn fetch_block_receipts_with_http(
-        &self,
-        provider: Arc<Provider<Http>>,
-        block_number: U64,
-    ) -> anyhow::Result<Vec<TransactionReceipt>> {
-        let block = provider
-            .get_block_with_txs(block_number)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Block not found"))?;
+    // async fn fetch_block_receipts_with_http(
+    //     &self,
+    //     provider: Arc<Provider<Http>>,
+    //     block_number: U64,
+    // ) -> anyhow::Result<Vec<TransactionReceipt>> {
+    //     let block = provider
+    //         .get_block_with_txs(block_number)
+    //         .await?
+    //         .ok_or_else(|| anyhow::anyhow!("Block not found"))?;
+    //     let receipt_futures = block
+    //         .transactions
+    //         .into_iter()
+    //         .map(|tx| provider.get_transaction_receipt(tx.hash));
+    //     let receipts = join_all(receipt_futures)
+    //         .await
+    //         .into_iter()
+    //         .collect::<Result<Vec<_>, _>>()?
+    //         .into_iter()
+    //         .flatten()
+    //         .collect();
+    //     Ok(receipts)
+    // }
 
-        let receipt_futures = block
-            .transactions
-            .into_iter()
-            .map(|tx| provider.get_transaction_receipt(tx.hash));
+    // async fn handle_block_recipts(
+    //     &self,
+    //     receipts: Vec<TransactionReceipt>,
+    //     block_number: u64,
+    // ) -> anyhow::Result<(), anyhow::Error> {
+    //     // Handle the logs in the transaction receipts.
+    //     let mut events = Vec::new();
+    //     for receipt in receipts {
+    //         for log in receipt.logs {
+    //             events.push(self.parse_log_as_event(log.to_owned()).await?);
+    //         }
+    //     }
+    //     if !events.is_empty() {
+    //         return Ok(());
+    //     }
+    //     // Persist the events to DB.
+    //     match self.save_events_batch(&events).await {
+    //         anyhow::Result::Ok(_) => match self.save_checkpoint(block_number).await {
+    //             anyhow::Result::Ok(_) => {
+    //                 info!("Persisted checkpoint the block: {}", block_number);
+    //             }
+    //             Err(e) => {
+    //                 error!("Error process persist with block {}: {:?}", block_number, e);
+    //                 return Err(e.into());
+    //             }
+    //         },
+    //         Err(e) => {
+    //             error!("Error process persist with block {}: {:?}", block_number, e);
+    //             return Err(e.into());
+    //         }
+    //     }
+    //     // Handle the chain transaction rollback.
+    //     match self.handle_rollback(&events).await {
+    //         anyhow::Result::Ok(_) => Ok(()),
+    //         Err(e) => Err(e.into()),
+    //     }
+    // }
 
-        let receipts = join_all(receipt_futures)
-            .await
-            .into_iter()
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .flatten()
-            .collect();
+    async fn parse_log_as_event(&self, log: Log) -> anyhow::Result<EthTransactionEvent, anyhow::Error> {
+        // Match the contract address.
+        let spec = self
+            .contract_specs
+            .iter()
+            .find(|c| c.address == log.address)
+            .ok_or_else(|| anyhow::anyhow!("Contract spec not found for address: {:?}", log.address))?;
 
-        Ok(receipts)
-    }
+        // Match the event signature.
+        let abi_event = spec
+            .abi
+            .events()
+            .find(|e| e.signature() == log.topics[0])
+            .ok_or_else(|| anyhow::anyhow!("Event not found for signature: {:?}", log.topics[0]))?;
 
-    async fn handle_block_recipts(
-        &self,
-        receipts: Vec<TransactionReceipt>,
-        block_number: u64,
-    ) -> anyhow::Result<(), anyhow::Error> {
-        // Handle the logs in the transaction receipts.
-        let mut events = Vec::new();
-        for receipt in receipts {
-            for log in receipt.logs {
-                if let Some(event) = self.parse_log_as_event(log.to_owned()).await {
-                    events.push(event);
-                }
-            }
+        // Match the event name.
+        if !spec.filter_events.contains(&abi_event.name) {
+            return Err(anyhow::anyhow!("Event not found for name: {:?}", abi_event.name));
         }
 
-        // Persist the All event to DB.
-        if !events.is_empty() {
-            match self.save_events_batch(events).await {
-                anyhow::Result::Ok(_) => match self.save_checkpoint(block_number).await {
-                    anyhow::Result::Ok(_) => {
-                        self.save_checkpoint(block_number).await?;
-                    }
-                    Err(e) => {
-                        error!("Error process persist with block {}: {:?}", block_number, e);
-                        return Err(e.into());
-                    }
-                },
-                Err(e) => {
-                    error!("Error process persist with block {}: {:?}", block_number, e);
-                    return Err(e.into());
-                }
-            }
-        }
-
-        // Handle the chain transaction rollback.
-        match self.handle_rollback(block_number).await {
-            anyhow::Result::Ok(_) => Ok(()),
-            Err(e) => Err(e.into()),
-        }
-    }
-
-    async fn parse_log_as_event(&self, log: Log) -> Option<EthTransactionEvent> {
-        // 查找匹配的合约配置
-        let contract_config = self.contract_specs.iter().find(|c| c.address == log.address)?;
-        // TODO: Assumption matched it.
-        // let contract_config = contracts.get(0)?;
-
-        // 从ABI创建事件解析器
-        let abi_event = contract_config.abi.events().find(|e| e.signature() == log.topics[0])?;
-
-        // 检查是否是我们跟踪的事件
-        if !contract_config.filter_events.contains(&abi_event.name) {
-            return None;
-        }
-
-        // 解析原始日志
-        let raw_log = RawLog {
+        // Parse raw log to abi event.
+        let abi_log = abi_event.parse_log(RawLog {
             topics: log.topics,
             data: log.data.to_vec(),
-        };
+        })?;
 
-        // 将日志解析为动态JSON值
-        let abi_log = match abi_event.parse_log(raw_log) {
-            anyhow::Result::Ok(log) => log,
-            Err(e) => {
-                error!("Failed to parse log: {:?}", e);
-                return None;
-            }
-        };
-
-        // 将事件参数转换为键值对
+        // Transform the log params to json map.
         let mut event_map = serde_json::Map::new();
         for (event_param, log_param) in abi_event.inputs.iter().zip(abi_log.params) {
             let value = match serde_json::to_value(&log_param.value) {
@@ -348,7 +406,7 @@ impl EthereumTxLogUpdater {
             event_map.insert(event_param.name.to_owned(), value);
         }
 
-        Some(EthTransactionEvent {
+        Ok(EthTransactionEvent {
             base: BaseBean::new_default(None),
             block_number: log.block_number.unwrap().as_u64(),
             transaction_hash: format!("{:?}", log.transaction_hash.unwrap()),
@@ -358,14 +416,23 @@ impl EthereumTxLogUpdater {
         })
     }
 
-    async fn save_events_batch(&self, events: Vec<EthTransactionEvent>) -> anyhow::Result<()> {
-        todo!()
+    async fn save_events_batch(&self, events: &Vec<EthTransactionEvent>) -> anyhow::Result<()> {
+        // TODO: impl batch inserts into DB.
+        for event in events.iter() {
+            self.eth_event_repo
+                .write()
+                .await
+                .get(&self.config)
+                .insert(event.to_owned())
+                .await?;
+        }
+        Ok(())
     }
 
-    async fn handle_rollback(&self, new_block_number: u64) -> anyhow::Result<()> {
+    async fn handle_rollback(&self, events: &Vec<EthTransactionEvent>) -> anyhow::Result<()> {
         // 删除比新区块号更大的所有区块数据
         // let deleted = sqlx::query("DELETE FROM contract_events WHERE block_number > $1")
-        //     .bind(new_block_number as i64)
+        //     .bind(block_number as i64)
         //     .execute(pool)
         //     .await?;
         // if deleted.rows_affected() > 0 {
@@ -375,28 +442,26 @@ impl EthereumTxLogUpdater {
         //     );
         // }
         // Ok(())
-        todo!()
+        // TODO: impl batch inserts into DB.
+        for event in events.iter() {
+            self.eth_event_repo
+                .write()
+                .await
+                .get(&self.config)
+                .insert(event.to_owned())
+                .await?;
+        }
+        Ok(())
     }
 
     async fn save_checkpoint(&self, block_number: u64) -> anyhow::Result<()> {
-        // sqlx::query(
-        //     "INSERT INTO checkpoints (id, last_processed_block)
-        //      VALUES (1, $1)
-        //      ON CONFLICT (id) DO UPDATE SET last_processed_block = $1",
-        // )
-        // .bind(block_number as i64)
-        // .execute(pool)
-        // .await?;
-        // Ok(())
-
-        // TODO: build ethereum event object.
-        let mut param = EthTransactionEvent::default();
-        param.block_number = block_number;
-        self.eth_event_repo
+        let mut checkpoint = EthEventCheckpoint::default();
+        checkpoint.last_processed_block = block_number;
+        self.eth_checkpoint_repo
             .write()
             .await
             .get(&self.config)
-            .insert(param)
+            .insert(checkpoint)
             .await?;
         Ok(())
     }

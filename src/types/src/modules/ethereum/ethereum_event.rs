@@ -55,8 +55,10 @@ impl Default for EthTransactionEvent {
 /// SqliteRow impl for EthTransactionEvent.
 impl<'r> FromRow<'r, SqliteRow> for EthTransactionEvent {
     fn from_row(row: &'r SqliteRow) -> Result<Self, sqlx::Error> {
+        let mut base = BaseBean::from_row(row).expect("Failed to deserialize BaseBean");
+        base.del_flag = row.try_get::<Option<bool>, _>("removed")?.map(|v| v as i32);
         std::result::Result::Ok(EthTransactionEvent {
-            base: BaseBean::from_row(row).unwrap(),
+            base,
             block_number: row.try_get("block_number")?,
             transaction_hash: row.try_get("transaction_hash")?,
             contract_address: row.try_get("contract_address")?,
@@ -69,8 +71,10 @@ impl<'r> FromRow<'r, SqliteRow> for EthTransactionEvent {
 /// Postgres Row impl for EthTransactionEvent.
 impl<'r> FromRow<'r, PgRow> for EthTransactionEvent {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
+        let mut base = BaseBean::from_row(row).expect("Failed to deserialize BaseBean");
+        base.del_flag = row.try_get::<Option<bool>, _>("removed")?.map(|v| v as i32);
         std::result::Result::Ok(EthTransactionEvent {
-            base: BaseBean::from_row(row)?,
+            base,
             block_number: row.try_get::<i64, _>("block_number")? as u64, // Explicitly specify type and cast
             transaction_hash: row.try_get("transaction_hash")?,
             contract_address: row.try_get("contract_address")?,

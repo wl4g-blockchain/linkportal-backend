@@ -29,6 +29,7 @@ use lazy_static::lazy_static;
 use linkportal_utils::secrets::SecretHelper;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::{env, ops::Deref, str::FromStr, sync::Arc, time::Duration};
 use validator::Validate;
 
@@ -399,7 +400,7 @@ pub struct ServicesProperties {
 }
 
 /// Chain data Updater based LLM, Supports multi different L1 chains, as well as different environment networks of the same L1 chain.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct UpdaterProperties {
     #[serde(rename = "kind")]
     pub kind: String,
@@ -411,15 +412,120 @@ pub struct UpdaterProperties {
     pub cron: String, // e.g: 0/30 * * * * * *
     #[serde(rename = "channel-size")]
     pub channel_size: usize, // e.g: 200
-    #[serde(rename = "chain")]
-    pub chain: GenericChainProperties,
+    #[serde(flatten)]
+    pub chain: BlockChainProperties,
 }
 
-/// Generic chain updater properties.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GenericChainProperties {
-    #[serde(rename = "network-id")]
-    pub network_id: String, // e.g: 1
+//#[serde(tag = "chain-kind", content = "chain-config")]
+#[serde(untagged)]
+pub enum BlockChainProperties {
+    ETHEREUM(EthereumChainProperties),
+    SOLANA(SolanaChainProperties),
+}
+
+impl BlockChainProperties {
+    pub fn is_ethereum(&self) -> bool {
+        matches!(self, BlockChainProperties::ETHEREUM(_))
+    }
+
+    pub fn is_solana(&self) -> bool {
+        matches!(self, BlockChainProperties::SOLANA(_))
+    }
+
+    pub fn as_ethereum(&self) -> &EthereumChainProperties {
+        assert!(
+            self.is_ethereum(),
+            "Could not convert to Ethereum chain config from {:?}",
+            self
+        );
+        if let BlockChainProperties::ETHEREUM(config) = self {
+            config
+        } else {
+            panic!("Could not convert to Ethereum chain config from {:?}", self)
+        }
+    }
+
+    pub fn as_solana(&self) -> &SolanaChainProperties {
+        assert!(
+            self.is_solana(),
+            "Could not convert to Solana chain config from {:?}",
+            self
+        );
+        if let BlockChainProperties::SOLANA(config) = self {
+            config
+        } else {
+            panic!("Could not convert to Solana chain config from {:?}", self)
+        }
+    }
+}
+
+/// The custom deserialization to dynamic parse by kind.
+impl<'de> Deserialize<'de> for UpdaterProperties {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let mut map = serde_json::Map::deserialize(deserializer)?;
+        let chain_map = (map
+            .to_owned()
+            .remove("chain")
+            .ok_or_else(|| serde::de::Error::custom("Missing 'chain' config field"))?)
+        .as_object()
+        .expect("Failed to parse the config field '.chain'")
+        .to_owned();
+
+        let kind = map
+            .to_owned()
+            .remove("kind")
+            .ok_or_else(|| serde::de::Error::custom("Missing 'kind' field"))?
+            .as_str()
+            .ok_or_else(|| serde::de::Error::custom("'kind' must be a string"))?
+            .to_owned();
+
+        let blockchain_config = match kind.to_uppercase().as_str() {
+            "ETHEREUM" => BlockChainProperties::ETHEREUM(
+                EthereumChainProperties::deserialize(Value::Object(chain_map.to_owned()))
+                    .map_err(|e| serde::de::Error::custom(format!("Invalid Ethereum config: {}", e)))?,
+            ),
+            "SOLANA" => BlockChainProperties::SOLANA(
+                SolanaChainProperties::deserialize(Value::Object(chain_map.to_owned()))
+                    .map_err(|e| serde::de::Error::custom(format!("Invalid Solana config: {}", e)))?,
+            ),
+            _ => {
+                return Err(serde::de::Error::custom(format!(
+                    "Unsupported chain type in 'kind': {}",
+                    kind
+                )))
+            }
+        };
+
+        Ok(Self {
+            kind: kind.to_owned(),
+            name: _pop_field(&mut map, "name").expect("Missing 'name' field"),
+            enabled: _pop_field(&mut map, "enabled").expect("Missing 'enabled' field"),
+            cron: _pop_field(&mut map, "cron").expect("Missing 'cron' field"),
+            channel_size: _pop_field(&mut map, "channel-size").expect("Missing 'channel-size' field"),
+            chain: blockchain_config,
+        })
+    }
+}
+
+/// The internal helper func to deserialize a get and remove the field.
+fn _pop_field<'de, T: Deserialize<'de>>(
+    map: &mut serde_json::Map<String, Value>,
+    key: &str,
+) -> Result<T, anyhow::Error> {
+    let value = map
+        .remove(key)
+        .ok_or_else(|| anyhow::anyhow!(format!("Missing field '{}'", key)))?;
+    T::deserialize(value).map_err(|e| anyhow::anyhow!(format!("Invalid value for '{}': {}", key, e)))
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct EthereumChainProperties {
+    #[serde(rename = "chain-id")]
+    pub chain_id: String, // e.g: 1
     #[serde(rename = "http-rpc-url")]
     pub http_rpc_url: String, // e.g: https://eth-mainnet.g.alchemy.com/v2/<YOUR_API_KEY>
     #[serde(rename = "ws-rpc-url")]
@@ -430,6 +536,22 @@ pub struct GenericChainProperties {
     pub abi_path: String, // e.g: '/etc/linkportal/abi/ethereum/UniswapV2Factory.json'
     #[serde(rename = "filters")]
     pub filters: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SolanaChainProperties {
+    #[serde(rename = "chain-id")]
+    pub chain_id: String,
+    #[serde(rename = "rpc-url")]
+    pub rpc_url: String,
+    #[serde(rename = "ws-url")]
+    pub ws_url: Option<String>,
+    #[serde(rename = "program-ids")]
+    pub program_ids: Vec<String>,
+    #[serde(rename = "account-filters")]
+    pub account_filters: Option<Vec<String>>,
+    #[serde(rename = "commitment")]
+    pub commitment: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -802,8 +924,9 @@ impl Deref for PgVectorDBProperties {
     }
 }
 
+//
 // Services Properties impls.
-
+//
 impl Default for ServicesProperties {
     fn default() -> Self {
         ServicesProperties {
