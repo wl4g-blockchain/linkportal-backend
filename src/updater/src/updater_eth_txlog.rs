@@ -33,8 +33,11 @@ use linkportal_server::{
     context::state::LinkPortalState,
     store::RepositoryContainer,
 };
-use linkportal_types::modules::ethereum::ethereum_event::{EthContractSpec, EthTransactionEvent};
 use linkportal_types::{modules::ethereum::ethereum_checkpoint::EthEventCheckpoint, BaseBean};
+use linkportal_types::{
+    modules::ethereum::ethereum_event::{EthContractSpec, EthTransactionEvent},
+    PageRequest,
+};
 use serde_json::{json, Value};
 use std::{fs::File, io::BufReader, sync::Arc};
 use tokio::sync::RwLock;
@@ -109,11 +112,18 @@ impl EthereumTxLogUpdater {
         let eth_checkpoint_repo = self.eth_checkpoint_repo.read().await;
         let checkpoint = eth_checkpoint_repo
             .get(&self.config)
-            .select_by_id(1) // TODO: parameter id ?
+            .select(EthEventCheckpoint::default(), PageRequest::default())
             .await;
-        // if there are no checkpoint, set the last_processed_block to 0.
+
+        // if there are no checkpoint, set the default last processed block to 0.
         match checkpoint {
-            std::result::Result::Ok(checkpoint) => Ok(checkpoint.last_processed_block as u64),
+            std::result::Result::Ok(checkpoint) => {
+                if checkpoint.1.is_empty() {
+                    Ok(0)
+                } else {
+                    Ok(checkpoint.1.last().map(|e| e.last_processed_block).unwrap_or(0))
+                }
+            }
             Err(_) => Ok(0),
         }
     }

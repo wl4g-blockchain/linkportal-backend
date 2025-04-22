@@ -52,8 +52,9 @@ lazy_static! {
     );
 }
 
+//
 // App Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone, Validate)]
 #[serde(rename_all = "kebab-case")]
 pub struct AppConfigProperties {
@@ -80,8 +81,9 @@ pub struct AppConfigProperties {
     pub services: ServicesProperties,
 }
 
+//
 // Server Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServerProperties {
     #[serde(rename = "host")]
@@ -92,8 +94,9 @@ pub struct ServerProperties {
     pub context_path: Option<String>,
 }
 
+//
 // Management Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MgmtProperties {
     #[serde(rename = "enabled")]
@@ -140,16 +143,18 @@ pub struct OtelProperties {
     // Notice: More OTEL custom configuration use to environment: OTEL_SPAN_xxx, see to: opentelemetry_sdk::trace::config::default()
 }
 
+//
 // Logging Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LoggingProperties {
     pub mode: LogMode,
     pub level: String,
 }
 
+//
 // Swagger Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SwaggerProperties {
     pub enabled: bool,
@@ -167,8 +172,9 @@ pub struct SwaggerProperties {
     pub openapi_url: String,
 }
 
+//
 // Auth Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AuthProperties {
     #[serde(rename = "jwt-ak-name")]
@@ -248,8 +254,9 @@ impl Deref for GithubProperties {
     }
 }
 
+//
 // Cache Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CacheProperties {
     pub provider: CacheProvider,
@@ -292,8 +299,9 @@ pub struct RedisProperties {
     pub read_from_replicas: Option<bool>,
 }
 
+//
 // App DB Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppDBProperties {
     #[serde(rename = "type")]
@@ -356,8 +364,9 @@ pub struct MongoAppDBProperties {
     pub database: Option<String>,
 }
 
+//
 // Vector DB Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct VectorDBProperties {
     #[serde(rename = "type")]
@@ -378,8 +387,9 @@ pub struct PgVectorDBProperties {
     pub inner: PostgresPropertiesBase,
 }
 
+//
 // Services Properties.
-
+//
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServicesProperties {
     #[serde(rename = "updaters")]
@@ -477,8 +487,9 @@ pub struct GenerateLLMProperties {
     pub system_prompt: String,
 }
 
+//
 // App Properties impls.
-
+//
 impl AppConfigProperties {
     pub fn default() -> AppConfigProperties {
         AppConfigProperties {
@@ -512,8 +523,9 @@ impl ServerProperties {
     }
 }
 
+//
 // Management Properties impls.
-
+//
 impl Default for MgmtProperties {
     fn default() -> Self {
         MgmtProperties {
@@ -566,8 +578,9 @@ impl Default for OtelProperties {
     }
 }
 
+//
 // Logging Properties impls.
-
+//
 impl Default for LoggingProperties {
     fn default() -> Self {
         LoggingProperties {
@@ -577,8 +590,9 @@ impl Default for LoggingProperties {
     }
 }
 
+//
 // Swagger Properties impls.
-
+//
 impl Default for SwaggerProperties {
     fn default() -> Self {
         SwaggerProperties {
@@ -599,8 +613,9 @@ impl Default for SwaggerProperties {
     }
 }
 
+//
 // Auth Properties impls.
-
+//
 impl Default for AuthProperties {
     fn default() -> Self {
         AuthProperties {
@@ -656,8 +671,9 @@ impl Default for GithubProperties {
     }
 }
 
+//
 // Cache Properties impls.
-
+//
 impl Default for CacheProperties {
     fn default() -> Self {
         CacheProperties {
@@ -695,8 +711,9 @@ impl Default for RedisProperties {
     }
 }
 
+//
 // App DB Properties impls.
-
+//
 impl Default for AppDBProperties {
     fn default() -> Self {
         AppDBProperties {
@@ -757,8 +774,9 @@ impl Default for MongoAppDBProperties {
     }
 }
 
+//
 // Vector DB Properties impls.
-
+//
 impl Default for VectorDBProperties {
     fn default() -> Self {
         VectorDBProperties {
@@ -837,8 +855,9 @@ impl Default for GenerateLLMProperties {
     }
 }
 
+//
 // App Configuration.
-
+//
 #[derive(Debug)]
 pub struct AppConfig {
     pub inner: AppConfigProperties,
