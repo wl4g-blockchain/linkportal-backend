@@ -69,7 +69,7 @@ impl LinkPortalUpdaterServer {
 
     #[allow(unused)]
     async fn start(config: &Arc<AppConfig>, verbose: bool) {
-        LLMManager::init().await;
+        // LLMManager::init().await;
         ChainTxLogUpdaterManager::init().await;
 
         let app_state = LinkPortalState::new(&config).await;

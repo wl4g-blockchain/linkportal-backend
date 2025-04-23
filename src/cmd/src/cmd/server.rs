@@ -91,7 +91,7 @@ impl WebServer {
         addition_router: Option<Router<LinkPortalState>>,
         addition_middleware: Option<MiddlewareFunction>,
     ) {
-        LLMManager::init().await;
+        // LLMManager::init().await;
 
         let app_state = LinkPortalState::new(&config).await;
 
