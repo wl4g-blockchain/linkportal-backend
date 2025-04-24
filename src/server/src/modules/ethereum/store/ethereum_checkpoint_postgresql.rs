@@ -50,6 +50,97 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointPostgresRepositor
         checkpoint: EthEventCheckpoint,
         page: PageRequest,
     ) -> Result<(PageResponse, Vec<EthEventCheckpoint>), Error> {
+        // use chrono::{DateTime, Utc};
+        // use linkportal_utils::types::GenericValue;
+        // let table = "ch_ethereum_checkpoint";
+        // let order_by = "update_time";
+        // // Notice:
+        // // 1. (SQLite) Because the ORM library is not used for the time being, the fields are dynamically
+        // // parsed based on serde_json, so the #[serde(rename="xx")] annotation is effective.
+        // // 2. (MongoDB) The underlying BSON serialization is also based on serde, so using #[serde(rename="xx")] is also valid
+        // // TODO: It is recommended to use an ORM framework, see: https://github.com/diesel-rs/diesel
+        // let serialized = serde_json::to_value(&checkpoint)?;
+        // let obj = serialized
+        //     .as_object()
+        //     .ok_or_else(|| anyhow::anyhow!("Expected JSON object"))?;
+        // let mut fields = Vec::new();
+        // let mut params = Vec::new();
+        // let mut index = 0;
+        // for (key, value) in obj {
+        //     if !value.is_null() {
+        //         let v = value.as_str().unwrap_or("");
+        //         if !v.is_empty() {
+        //             index += 1;
+        //             // Notice: Must use $x expression? otherwise, the sqlx will not work.
+        //             // e.g: "SELECT COUNT(1) as count FROM my_table WHERE create_time = $1 AND update_time = $2"
+        //             fields.push(format!("{} = ${}", key, index));
+        //             if key == "create_time" || key == "update_time" {
+        //                 let dt = DateTime::parse_from_rfc3339(v)?;
+        //                 params.push(GenericValue::DateTime(dt.with_timezone(&Utc)));
+        //             } else {
+        //                 params.push(GenericValue::String(v.to_string()));
+        //             }
+        //         }
+        //     }
+        // }
+        // if let Some(id) = checkpoint.base.id {
+        //     fields.push("id = ?".to_string());
+        //     params.push(GenericValue::Int64(id));
+        // }
+        // let where_clause = if fields.is_empty() {
+        //     "1=1".to_string()
+        // } else {
+        //     fields.join(" AND ")
+        // };
+        // // Queries to get total count.
+        // let total_query = format!("SELECT COUNT(1) FROM {} WHERE {}", table, where_clause);
+        // use sqlx::Row;
+        // let mut total_operator = sqlx::query(&total_query);
+        // for param in params.iter() {
+        //     if let GenericValue::Bool(v) = param {
+        //         total_operator = total_operator.bind(v);
+        //     } else if let GenericValue::Int64(v) = param {
+        //         total_operator = total_operator.bind(v);
+        //     } else if let GenericValue::Float64(v) = param {
+        //         total_operator = total_operator.bind(v);
+        //     } else if let GenericValue::String(v) = param {
+        //         total_operator = total_operator.bind(v);
+        //     } else if let GenericValue::DateTime(v) = param {
+        //         total_operator = total_operator.bind(v);
+        //     }
+        // }
+        // let total_count = total_operator.fetch_one(self.inner.get_pool()).await?.get::<i64, _>(0);
+        // // Queries to get data.
+        // let query = format!(
+        //     "SELECT * FROM {} WHERE {} ORDER BY {} LIMIT {} OFFSET {}",
+        //     table,
+        //     where_clause,
+        //     order_by,
+        //     page.get_limit(),
+        //     page.get_offset()
+        // );
+        // let mut operator = sqlx::query_as::<_, EthEventCheckpoint>(&query);
+        // for param in params.iter() {
+        //     if let GenericValue::Bool(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::Int64(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::Float64(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::String(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::DateTime(v) = param {
+        //         operator = operator.bind(v);
+        //     }
+        // }
+        // match operator.fetch_all(self.inner.get_pool()).await {
+        //     std::result::Result::Ok(result) => {
+        //         let p = PageResponse::new(Some(total_count), Some(page.get_offset()), Some(page.get_limit()));
+        //         Ok((p, result))
+        //     }
+        //     Err(error) => Err(error.into()),
+        // }
+
         let result = dynamic_postgres_query!(
             checkpoint,
             "ch_ethereum_checkpoint",
@@ -75,6 +166,64 @@ impl AsyncRepository<EthEventCheckpoint> for EthereumCheckpointPostgresRepositor
     }
 
     async fn insert(&self, mut checkpoint: EthEventCheckpoint) -> Result<i64, Error> {
+        // use chrono::{DateTime, Utc};
+        // use linkportal_utils::types::GenericValue;
+        // let serialized = serde_json::to_value(checkpoint).unwrap();
+        // let obj = serialized.as_object().unwrap();
+        // let mut fields = Vec::new();
+        // let mut values = Vec::new();
+        // let mut params = Vec::new();
+        // for (key, value) in obj {
+        //     if !value.is_null() {
+        //         if value.is_boolean() {
+        //             let v = value.as_bool().unwrap();
+        //             fields.push(key.as_str());
+        //             values.push("?");
+        //             params.push(GenericValue::Bool(v));
+        //         } else if value.is_number() {
+        //             if value.is_i64() {
+        //                 let v = value.as_i64().unwrap();
+        //                 fields.push(key.as_str());
+        //                 values.push("?");
+        //                 params.push(GenericValue::Int64(v));
+        //             } else if value.is_f64() {
+        //                 let v = value.as_f64().unwrap();
+        //                 fields.push(key.as_str());
+        //                 values.push("?");
+        //                 params.push(GenericValue::Float64(v));
+        //             }
+        //         } else if value.is_string() {
+        //             let v = value.as_str().unwrap_or("");
+        //             if !v.is_empty() {
+        //                 fields.push(key.as_str());
+        //                 values.push("?");
+        //                 if key == "create_time" || key == "update_time" {
+        //                     let dt = DateTime::parse_from_rfc3339(v)?;
+        //                     params.push(GenericValue::DateTime(dt.with_timezone(&Utc)));
+        //                 } else {
+        //                     params.push(GenericValue::String(v.to_string()));
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // let query = format!("INSERT INTO {} ({}) VALUES ({}) ON CONFLICT (id) DO UPDATE SET {} RETURNING id",
+        //         $table, fields.join(","), values.join(","), "update_time = CURRENT_TIMESTAMP(13)");
+        // let mut operator = sqlx::query(&query);
+        // for param in params.iter() {
+        //     if let GenericValue::Bool(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::Int64(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::Float64(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::String(v) = param {
+        //         operator = operator.bind(v);
+        //     } else if let GenericValue::DateTime(v) = param {
+        //         operator = operator.bind(v);
+        //     }
+        // }
+
         let inserted_id = dynamic_postgres_insert!(checkpoint, "ch_ethereum_checkpoint", self.inner.get_pool())?;
         info!("Inserted checkpoint.id: {:?}", inserted_id);
         Ok(inserted_id)

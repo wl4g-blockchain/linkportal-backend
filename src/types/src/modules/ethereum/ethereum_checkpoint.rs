@@ -36,7 +36,7 @@ pub struct EthEventCheckpoint {
 impl Default for EthEventCheckpoint {
     fn default() -> Self {
         EthEventCheckpoint {
-            base: BaseBean::new_default(None),
+            base: BaseBean::new_empty(),
             last_processed_block: 0,
         }
     }
@@ -80,7 +80,7 @@ pub struct QueryEthEventCheckpointRequest {
 impl QueryEthEventCheckpointRequest {
     pub fn to_checkpoint(&self) -> anyhow::Result<EthEventCheckpoint, anyhow::Error> {
         Ok(EthEventCheckpoint {
-            base: BaseBean::new(None, None, None),
+            base: BaseBean::new_with_by(None, None, None),
             last_processed_block: self
                 .last_processed_block
                 .ok_or_else(|| anyhow::anyhow!("last_processed_block is required"))?,
@@ -114,7 +114,7 @@ pub struct SaveEthEventCheckpointRequest {
 impl SaveEthEventCheckpointRequest {
     pub fn to_checkpoint(&self) -> anyhow::Result<EthEventCheckpoint, anyhow::Error> {
         Ok(EthEventCheckpoint {
-            base: BaseBean::new_default(self.id),
+            base: BaseBean::new_with_id(self.id),
             last_processed_block: self
                 .last_processed_block
                 .ok_or_else(|| anyhow::anyhow!("last_processed_block is required"))?,

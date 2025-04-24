@@ -21,7 +21,7 @@
 --
 -- Create the users table.
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY NOT NULL,
+    id BIGINT PRIMARY KEY NOT NULL,
     name VARCHAR(64) NULL,
     -- "账号昵称"
     email VARCHAR(64) NULL,
@@ -53,10 +53,10 @@ CREATE TABLE IF NOT EXISTS users (
     ethers_address VARCHAR(64) NULL,
     -- 'Ethers Wallet 地址, 来自签名认证'
     lang VARCHAR(64) NULL,
-    status integer NULL default 0,
+    status INTEGER NULL default 0,
     create_by VARCHAR(64) NULL,
-    create_time integer default current_timestamp,
+    create_time BIGINT DEFAULT (EXTRACT(EPOCH FROM current_timestamp) * 1000)::BIGINT,
     update_by VARCHAR(64) NULL,
-    update_time integer default current_timestamp,
-    del_flag integer not NULL default 0
+    update_time BIGINT DEFAULT (EXTRACT(EPOCH FROM current_timestamp) * 1000)::BIGINT,
+    del_flag INTEGER not NULL default 0
 );

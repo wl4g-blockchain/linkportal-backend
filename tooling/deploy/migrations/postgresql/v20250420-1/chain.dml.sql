@@ -1,0 +1,1 @@
+INSERT INTO "public"."ch_ethereum_checkpoint" ("id", "last_processed_block", "status", "create_by", "create_time", "update_by", "update_time", "del_flag") VALUES (1, 22333553, NULL, '1', 0, NULL, 0, 0);

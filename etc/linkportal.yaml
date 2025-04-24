@@ -171,7 +171,7 @@ services:
           # e.g: Chainlink Router contract on Ethereum Mainnet.
           # see:https://docs.chain.link/ccip/directory/mainnet/chain/mainnet
           # see:https://etherscan.io/address/0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D#code
-          - addr: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D"
+          - address: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D"
             # e.g: export LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__CONTRACTS[0]__ABI_PATH="${workspaceFolder}/etc/abi/chainlink-router-on-ethereum-mainnet-20250424.json"
             abi-path: "/etc/linkportal/abi/chainlink-router-on-ethereum-mainnet-20250424.json"
             event-names:
@@ -179,6 +179,8 @@ services:
               - Approval
               - OwnershipTransferRequested
               - OwnershipTransferred
+              - OffRampAdded
+              - OffRampRemoved
     #- kind: "ETHEREUM"
     #  name: "sepoliaEthTxLogUpdater"
     #  enabled: true
@@ -189,7 +191,7 @@ services:
     #    http-rpc-url: "https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
     #    ws-rpc-url: "wss://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>"
     #    contracts:
-    #      - addr: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+    #      - address: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
     #        abi-path: "/etc/linkportal/abi/uniswapv2factory-on-ethereum-mainnet-20250424.json"
     #        event-names:
     #          - PairCreated

@@ -42,7 +42,7 @@ pub struct EthTransactionEvent {
 impl Default for EthTransactionEvent {
     fn default() -> Self {
         EthTransactionEvent {
-            base: BaseBean::new_default(None),
+            base: BaseBean::new_with_id(None),
             block_number: 0,
             transaction_hash: "".to_string(),
             contract_address: "".to_string(),
@@ -108,7 +108,7 @@ pub struct QueryEthTransactionEventRequest {
 impl QueryEthTransactionEventRequest {
     pub fn to_event(&self) -> anyhow::Result<EthTransactionEvent, anyhow::Error> {
         Ok(EthTransactionEvent {
-            base: BaseBean::new(None, None, None),
+            base: BaseBean::new_with_by(None, None, None),
             block_number: self
                 .block_number
                 .ok_or_else(|| anyhow::anyhow!("block_number is required"))?,
@@ -162,7 +162,7 @@ pub struct SaveEthTransactionEventRequest {
 impl SaveEthTransactionEventRequest {
     pub fn to_event(&self) -> anyhow::Result<EthTransactionEvent, Error> {
         Ok(EthTransactionEvent {
-            base: BaseBean::new_default(self.id),
+            base: BaseBean::new_with_id(self.id),
             block_number: self
                 .block_number
                 .ok_or_else(|| anyhow::anyhow!("block_number is required"))?,

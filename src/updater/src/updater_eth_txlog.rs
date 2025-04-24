@@ -21,7 +21,7 @@
 use super::updater_base::IChainTxLogUpdater;
 use anyhow::{Context, Ok};
 use async_trait::async_trait;
-use common_telemetry::{error, info, warn};
+use common_telemetry::{debug, error, info, warn};
 use ethers::{
     abi::{Abi, RawLog},
     providers::{Http, Middleware, Provider, StreamExt, Ws},
@@ -37,10 +37,12 @@ use linkportal_types::{
     modules::ethereum::ethereum_event::{EthContractSpec, EthTransactionEvent},
     PageRequest,
 };
+use serde::de;
 use serde_json::{json, Value};
 use std::{fs::File, io::BufReader, sync::Arc};
 use tokio::sync::RwLock;
 use tokio_cron_scheduler::{Job, JobScheduler};
+use tracing_subscriber::field::debug;
 
 #[derive(Clone)]
 pub struct EthereumTxLogUpdater {
@@ -121,18 +123,23 @@ impl EthereumTxLogUpdater {
         let mut block_number = 0;
         let mut events = Vec::new();
         while let Some(log) = subscribe_stream.next().await {
-            info!("Processing the subscribe Ethereum log: {:?}", log);
+            info!("Subscribe TxLog: {:?}", log);
             block_number = log.block_number.unwrap().as_u64();
+            // skip the block if it is less than the last checkpoint.
             if block_number <= last_block {
-                // skip the block if it is less than the last checkpoint.
                 continue;
             }
             match self.parse_log_as_event(log.to_owned()).await {
-                anyhow::Result::Ok(event) => {
-                    events.push(event);
+                anyhow::Result::Ok(op) => {
+                    if let Some(event) = op {
+                        debug!("Parsed event: {:?}", event);
+                        events.push(event);
+                    } else {
+                        debug!("Ignore the parse event of log: {:?}", log);
+                    }
                 }
                 Err(e) => {
-                    error!("Error processing log {}: {:?}", block_number, e);
+                    warn!("Unable to parse log with ws. {}: {:?}", block_number, e);
                     continue;
                 }
             }
@@ -148,11 +155,11 @@ impl EthereumTxLogUpdater {
                     info!("Persisted checkpoint the block: {}", block_number);
                 }
                 Err(e) => {
-                    error!("Error process persist with block {}: {:?}", block_number, e);
+                    error!("Error persist with block {}: {:?}", block_number, e);
                 }
             },
             Err(e) => {
-                error!("Error process persist with block {}: {:?}", block_number, e);
+                error!("Error persist with block {}: {:?}", block_number, e);
             }
         };
 
@@ -184,15 +191,19 @@ impl EthereumTxLogUpdater {
         // Handle the missing blocks.
         while last_block < current_block {
             last_block += 1;
-            info!("Processing the Ethereum block number: {}", last_block);
-
+            info!("Polling block number: {}", last_block);
             for log in provider_http.get_logs(&self.build_logs_filter(last_block)).await? {
                 match self.parse_log_as_event(log.to_owned()).await {
-                    anyhow::Result::Ok(event) => {
-                        events.push(event);
+                    anyhow::Result::Ok(op) => {
+                        if let Some(event) = op {
+                            debug!("Parsed event: {:?}", event);
+                            events.push(event);
+                        } else {
+                            debug!("Ignore the parse event of log: {:?}", log);
+                        }
                     }
                     Err(e) => {
-                        error!("Error processing log {}: {:?}", last_block, e);
+                        warn!("Unable to parse log with http. {}: {:?}", last_block, e);
                         continue;
                     }
                 }
@@ -204,17 +215,17 @@ impl EthereumTxLogUpdater {
                         info!("Persisted checkpoint the block: {}", last_block);
                     }
                     Err(e) => {
-                        error!("Error process persist with block {}: {:?}", last_block, e);
+                        error!("Error persist with block {}: {:?}", last_block, e);
                     }
                 },
                 Err(e) => {
-                    error!("Error process persist with block {}: {:?}", last_block, e);
+                    error!("Error persist with block {}: {:?}", last_block, e);
                 }
             };
             // Handle the chain transaction rollback.
             match self.handle_rollback(&events).await {
                 anyhow::Result::Ok(_) => {
-                    info!("Finshed the handle rollback with events: {}", &events.iter().count());
+                    info!("Finshed the process rollback with events: {}", &events.iter().count());
                 }
                 Err(e) => {
                     info!(
@@ -241,7 +252,7 @@ impl EthereumTxLogUpdater {
         return filter;
     }
 
-    async fn parse_log_as_event(&self, log: Log) -> anyhow::Result<EthTransactionEvent, anyhow::Error> {
+    async fn parse_log_as_event(&self, log: Log) -> anyhow::Result<Option<EthTransactionEvent>, anyhow::Error> {
         // Match the contract address again.
         let spec = self
             .contract_specs
@@ -256,9 +267,9 @@ impl EthereumTxLogUpdater {
             .find(|e| e.signature() == log.topics[0])
             .ok_or_else(|| anyhow::anyhow!("Event not found for signature: {:?}", log.topics[0]))?;
 
-        // Double match the event name.
+        // This event is not what we wanted.
         if !spec.filter_events.contains(&abi_event.name) {
-            return Err(anyhow::anyhow!("Event not found for name: {:?}", abi_event.name));
+            return Ok(None);
         }
 
         // Parse raw log to abi event.
@@ -282,14 +293,14 @@ impl EthereumTxLogUpdater {
             event_map.insert(event_param.name.to_owned(), value);
         }
 
-        Ok(EthTransactionEvent {
-            base: BaseBean::new_default(None),
+        Ok(Some(EthTransactionEvent {
+            base: BaseBean::new_with_id(None),
             block_number: log.block_number.unwrap().as_u64(),
             transaction_hash: format!("{:?}", log.transaction_hash.unwrap()),
             contract_address: format!("{:?}", log.address),
             event_name: abi_event.name.clone(),
             event_data: Value::Object(event_map),
-        })
+        }))
     }
 
     async fn load_checkpoint(&self) -> anyhow::Result<u64> {
@@ -308,7 +319,10 @@ impl EthereumTxLogUpdater {
                     Ok(checkpoint.1.last().map(|e| e.last_processed_block).unwrap_or(0))
                 }
             }
-            Err(_) => Ok(0),
+            Err(e) => {
+                warn!("Failed to get checkpoint for contract {:?}", e);
+                Ok(0)
+            }
         }
     }
 

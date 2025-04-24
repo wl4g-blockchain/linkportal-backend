@@ -21,17 +21,18 @@
 --
 -- Create the ch_ethereum_event table
 CREATE TABLE IF NOT EXISTS ch_ethereum_event (
-    id SERIAL PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     block_number BIGINT NOT NULL,
     transaction_hash VARCHAR(66) NOT NULL,
     contract_address VARCHAR(42) NOT NULL,
     event_name VARCHAR(255) NOT NULL,
     event_data JSONB NOT NULL,
+    status INTEGER NULL default 0,
     create_by VARCHAR(64) NULL,
-    create_time TIMESTAMP default current_timestamp,
+    create_time TIMESTAMPTZ default current_timestamp,
     update_by VARCHAR(64) NULL,
-    update_time TIMESTAMP default current_timestamp,
-    del_flag integer not NULL default 0,
+    update_time TIMESTAMPTZ default current_timestamp,
+    del_flag INTEGER NOT NULL default 0,
     UNIQUE (transaction_hash, contract_address, event_name)
 );
 -- Create the All index for the ch_ethereum_event table.
@@ -41,11 +42,14 @@ CREATE INDEX IF NOT EXISTS idx_ch_ethereum_event_event_name ON ch_ethereum_event
 --
 -- Create the ch_ethereum_checkpoint table
 CREATE TABLE IF NOT EXISTS ch_ethereum_checkpoint (
-    id SERIAL PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     last_processed_block BIGINT NOT NULL,
+    status INTEGER NULL default 0,
     create_by VARCHAR(64) NULL,
-    create_time TIMESTAMP default current_timestamp,
+    create_time TIMESTAMPTZ default current_timestamp,
+    -- create_time BIGINT DEFAULT (EXTRACT(EPOCH FROM current_timestamp) * 1000)::BIGINT,
     update_by VARCHAR(64) NULL,
-    update_time TIMESTAMP default current_timestamp,
-    del_flag integer not NULL default 0
+    update_time TIMESTAMPTZ default current_timestamp,
+    -- update_time BIGINT DEFAULT (EXTRACT(EPOCH FROM current_timestamp) * 1000)::BIGINT,
+    del_flag INTEGER not NULL default 0
 );
