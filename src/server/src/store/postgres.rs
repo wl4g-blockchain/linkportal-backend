@@ -143,7 +143,7 @@ macro_rules! dynamic_postgres_query {
                         // e.g: "SELECT COUNT(1) as count FROM my_table WHERE create_time = $1 AND update_time = $2"
                         fields.push(format!("{} = ${}", key, index));
                         if key == "create_time" || key == "update_time" {
-                            let dt = DateTime::parse_from_rfc3339("s")?;
+                            let dt = DateTime::parse_from_rfc3339(v)?;
                             params.push(GenericValue::DateTime(dt.with_timezone(&Utc)));
                         } else {
                             params.push(GenericValue::String(v.to_string()));
@@ -260,7 +260,7 @@ macro_rules! dynamic_postgres_insert {
                             fields.push(key.as_str());
                             values.push("?");
                             if key == "create_time" || key == "update_time" {
-                                let dt = DateTime::parse_from_rfc3339("s")?;
+                                let dt = DateTime::parse_from_rfc3339(v)?;
                                 params.push(GenericValue::DateTime(dt.with_timezone(&Utc)));
                             } else {
                                 params.push(GenericValue::String(v.to_string()));
@@ -273,11 +273,6 @@ macro_rules! dynamic_postgres_insert {
                 return Ok(-1);
             }
 
-            // let fields_str = fields
-            //  .iter()
-            //  .map(|s| s.as_str())
-            //  .collect::<Vec<&str>>()
-            //  .join(",");
             // e.g: 'INSERT INTO ch_ethereum_checkpoint ( ID, last_processed_block ) VALUES ( 2, 12345 ) ON CONFLICT ( ID ) DO UPDATE SET update_time = CURRENT_TIMESTAMP(11) RETURNING ID;'
             let query = format!("INSERT INTO {} ({}) VALUES ({}) ON CONFLICT (id) DO UPDATE SET {} RETURNING id",
                 $table, fields.join(","), values.join(","), "update_time = CURRENT_TIMESTAMP(13)");

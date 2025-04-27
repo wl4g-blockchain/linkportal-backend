@@ -134,6 +134,21 @@ impl EthereumTxLogUpdater {
                     if let Some(event) = op {
                         debug!("Parsed event: {:?}", event);
                         events.push(event);
+
+                        // Persist the events to DB.
+                        match self.save_events_batch(&events).await {
+                            anyhow::Result::Ok(_) => match self.save_checkpoint(block_number).await {
+                                anyhow::Result::Ok(_) => {
+                                    info!("Persisted checkpoint the block: {}", block_number);
+                                }
+                                Err(e) => {
+                                    error!("Error persist with block {}: {:?}", block_number, e);
+                                }
+                            },
+                            Err(e) => {
+                                error!("Error persist with block {}: {:?}", block_number, e);
+                            }
+                        };
                     } else {
                         debug!("Ignore the parse event of log: {:?}", log);
                     }
