@@ -470,9 +470,9 @@ impl<'de> Deserialize<'de> for UpdaterProperties {
         let chain_map = (map
             .to_owned()
             .remove("chain")
-            .ok_or_else(|| serde::de::Error::custom("Missing 'chain' config field"))?)
+            .ok_or_else(|| serde::de::Error::custom("Missing 'chain' updater config field"))?)
         .as_object()
-        .expect("Failed to parse the config field '.chain'")
+        .expect("Failed to parse the updater config field '.chain'")
         .to_owned();
 
         let kind = map
@@ -536,6 +536,8 @@ pub struct EthereumChainProperties {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EthereumContractProperties {
+    #[serde(rename = "name")]
+    pub name: String, // e.g: RealEstateToken:v20250425
     #[serde(rename = "address")]
     pub address: String, // e.g: ["0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"]
     #[serde(rename = "abi-path")]
@@ -1098,7 +1100,10 @@ fn init() -> Arc<AppConfig> {
 
     let config = AppConfig::new(&yaml_config);
 
-    if env::var("LINKPORTAL_CFG_VERBOSE").is_ok() || env::var("VERBOSE").is_ok() {
+    if env::var("LINKPORTAL_CFG_VERBOSE")
+        .unwrap_or_else(|_| env::var("VERBOSE").unwrap_or_else(|_| "false".to_owned()))
+        .eq_ignore_ascii_case("true")
+    {
         println!("If you don't want to print the loaded configuration details, you can disable it by set up LINKPORTAL_CFG_VERBOSE=false.");
         println!(
             "Loaded the config details: {}",

@@ -37,12 +37,10 @@ use linkportal_types::{
     modules::ethereum::ethereum_event::{EthContractSpec, EthTransactionEvent},
     PageRequest,
 };
-use serde::de;
 use serde_json::{json, Value};
 use std::{fs::File, io::BufReader, sync::Arc};
 use tokio::sync::RwLock;
 use tokio_cron_scheduler::{Job, JobScheduler};
-use tracing_subscriber::field::debug;
 
 #[derive(Clone)]
 pub struct EthereumTxLogUpdater {
@@ -67,11 +65,14 @@ impl EthereumTxLogUpdater {
             .flat_map(|cs| cs.iter())
             .map(|c| {
                 let abi: Abi = serde_json::from_reader(BufReader::new(
-                    File::open(&c.abi_path).expect(format!("Failed to read ABI file: {}", c.abi_path).as_str()),
+                    File::open(&c.abi_path).expect(format!("Cannot to read ABI file: {}", c.abi_path).as_str()),
                 ))
-                .expect("Failed to read ABI from contract json.");
+                .expect(format!("Failed to read ABI file {:?}", &c.abi_path).as_ref());
                 EthContractSpec {
-                    address: c.address.parse().expect("Failed to parse contract address"),
+                    name: c.name.to_owned(),
+                    address: c.address.parse().expect(
+                        format!("Cannot to parse contract address {:?} of {:?}", c.address, &c.abi_path).as_str(),
+                    ),
                     abi: abi.to_owned(),
                     filter_events: c.events.to_owned(),
                 }
@@ -134,21 +135,6 @@ impl EthereumTxLogUpdater {
                     if let Some(event) = op {
                         debug!("Parsed event: {:?}", event);
                         events.push(event);
-
-                        // Persist the events to DB.
-                        match self.save_events_batch(&events).await {
-                            anyhow::Result::Ok(_) => match self.save_checkpoint(block_number).await {
-                                anyhow::Result::Ok(_) => {
-                                    info!("Persisted checkpoint the block: {}", block_number);
-                                }
-                                Err(e) => {
-                                    error!("Error persist with block {}: {:?}", block_number, e);
-                                }
-                            },
-                            Err(e) => {
-                                error!("Error persist with block {}: {:?}", block_number, e);
-                            }
-                        };
                     } else {
                         debug!("Ignore the parse event of log: {:?}", log);
                     }
@@ -312,6 +298,7 @@ impl EthereumTxLogUpdater {
             base: BaseBean::new_with_id(None),
             block_number: log.block_number.unwrap().as_u64(),
             transaction_hash: format!("{:?}", log.transaction_hash.unwrap()),
+            contract_name: format!("{:?}", spec.name),
             contract_address: format!("{:?}", log.address),
             event_name: abi_event.name.clone(),
             event_data: Value::Object(event_map),

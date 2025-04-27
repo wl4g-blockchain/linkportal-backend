@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS ch_ethereum_event (
     id BIGINT PRIMARY KEY,
     block_number BIGINT NOT NULL,
     transaction_hash VARCHAR(66) NOT NULL,
+    contract_name VARCHAR(64) NOT NULL,
     contract_address VARCHAR(42) NOT NULL,
     event_name VARCHAR(255) NOT NULL,
     event_data JSONB NOT NULL,

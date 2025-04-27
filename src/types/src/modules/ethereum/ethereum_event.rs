@@ -34,6 +34,7 @@ pub struct EthTransactionEvent {
     pub base: BaseBean,
     pub block_number: u64,
     pub transaction_hash: String,
+    pub contract_name: String,
     pub contract_address: String,
     pub event_name: String,
     pub event_data: Value, // Event JSON data.
@@ -45,6 +46,7 @@ impl Default for EthTransactionEvent {
             base: BaseBean::new_with_id(None),
             block_number: 0,
             transaction_hash: "".to_string(),
+            contract_name: "".to_string(),
             contract_address: "".to_string(),
             event_name: "".to_string(),
             event_data: Value::Null,
@@ -61,6 +63,7 @@ impl<'r> FromRow<'r, SqliteRow> for EthTransactionEvent {
             base,
             block_number: row.try_get("block_number")?,
             transaction_hash: row.try_get("transaction_hash")?,
+            contract_name: row.try_get("contract_name")?,
             contract_address: row.try_get("contract_address")?,
             event_name: row.try_get("event_name")?,
             event_data: row.try_get("event_data")?,
@@ -77,6 +80,7 @@ impl<'r> FromRow<'r, PgRow> for EthTransactionEvent {
             base,
             block_number: row.try_get::<i64, _>("block_number")? as u64, // Explicitly specify type and cast
             transaction_hash: row.try_get("transaction_hash")?,
+            contract_name: row.try_get("contract_name")?,
             contract_address: row.try_get("contract_address")?,
             event_name: row.try_get("event_name")?,
             event_data: row.try_get("event_data")?,
@@ -100,6 +104,8 @@ pub struct QueryEthTransactionEventRequest {
     #[validate(length(min = 1, max = 256))]
     pub transaction_hash: Option<String>,
     #[validate(length(min = 1, max = 32))]
+    pub contract_name: Option<String>,
+    #[validate(length(min = 1, max = 32))]
     pub contract_address: Option<String>,
     #[validate(length(min = 1, max = 64))]
     pub event_name: Option<String>,
@@ -116,6 +122,10 @@ impl QueryEthTransactionEventRequest {
                 .transaction_hash
                 .to_owned()
                 .ok_or_else(|| anyhow::anyhow!("transaction_hash is required"))?,
+            contract_name: self
+                .contract_name
+                .to_owned()
+                .ok_or_else(|| anyhow::anyhow!("contract_name is required"))?,
             contract_address: self
                 .contract_address
                 .to_owned()
@@ -153,6 +163,8 @@ pub struct SaveEthTransactionEventRequest {
     #[validate(length(min = 1, max = 256))]
     pub transaction_hash: Option<String>,
     #[validate(length(min = 1, max = 32))]
+    pub contract_name: Option<String>,
+    #[validate(length(min = 1, max = 32))]
     pub contract_address: Option<String>,
     #[validate(length(min = 1, max = 64))]
     pub event_name: Option<String>,
@@ -170,6 +182,10 @@ impl SaveEthTransactionEventRequest {
                 .transaction_hash
                 .to_owned()
                 .ok_or_else(|| anyhow::anyhow!("transaction_hash is required"))?,
+            contract_name: self
+                .contract_name
+                .to_owned()
+                .ok_or_else(|| anyhow::anyhow!("contract_name is required"))?,
             contract_address: self
                 .contract_address
                 .to_owned()
@@ -215,6 +231,7 @@ impl DeleteEthTransactionEventResponse {
 
 /// The Contract watch configuration
 pub struct EthContractSpec {
+    pub name: String,
     pub address: H160,
     pub abi: Abi,
     pub filter_events: Vec<String>, // Target watch chain event names.
