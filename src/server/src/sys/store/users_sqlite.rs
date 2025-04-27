@@ -46,13 +46,13 @@ impl UserSQLiteRepository {
 #[async_trait]
 impl AsyncRepository<User> for UserSQLiteRepository {
     async fn select(&self, user: User, page: PageRequest) -> Result<(PageResponse, Vec<User>), Error> {
-        let result = dynamic_sqlite_query!(user, "users", self.inner.get_pool(), "update_time", page, User).unwrap();
+        let result = dynamic_sqlite_query!(user, "sys_user", self.inner.get_pool(), "update_time", page, User)?;
 
         info!("query users: {:?}", result);
         Ok((result.0, result.1))
 
         // sqlx
-        //   ::query_as::<_, User>("SELECT * FROM users LIMIT $1 OFFSET $2")
+        //   ::query_as::<_, User>("SELECT * FROM sys_user LIMIT $1 OFFSET $2")
         //   .bind(page.get_offset())
         //   .bind(page.get_limit())
         //   .fetch_all(self.inner.get_pool()).await
@@ -63,25 +63,24 @@ impl AsyncRepository<User> for UserSQLiteRepository {
     }
 
     async fn select_by_id(&self, id: i64) -> Result<User, Error> {
-        let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1 and del_flag = 0")
+        let user = sqlx::query_as::<_, User>("SELECT * FROM sys_user WHERE id = $1 and del_flag = 0")
             .bind(id)
             .fetch_one(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("query user: {:?}", user);
         Ok(user)
     }
 
     async fn insert(&self, mut user: User) -> Result<i64, Error> {
-        let inserted_id = dynamic_sqlite_insert!(user, "users", self.inner.get_pool()).unwrap();
+        let inserted_id = dynamic_sqlite_insert!(user, "sys_user", self.inner.get_pool())?;
         info!("Inserted user.id: {:?}", inserted_id);
         Ok(inserted_id)
 
         //  let result = sqlx
         //   ::query(
         //     r#"
-        //     INSERT INTO users (id, name, email, password, create_by, create_time, update_by, update_time, del_flag)
+        //     INSERT INTO sys_user (id, name, email, password, create_by, create_time, update_by, update_time, del_flag)
         //      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         //     "#
         //   )
@@ -96,45 +95,43 @@ impl AsyncRepository<User> for UserSQLiteRepository {
         //   .bind(user.base.update_time)
         //   .bind(user.base.del_flag)
         //   .execute(self.inner.get_pool()).await
-        //   .unwrap();
+        //   ?;
         // info!("Inserted result: {:?}, user.id: {:?}", result, id);
 
         // Ok(id)
     }
 
     async fn update(&self, mut user: User) -> Result<i64, Error> {
-        let updated_id = dynamic_sqlite_update!(user, "users", self.inner.get_pool()).unwrap();
+        let updated_id = dynamic_sqlite_update!(user, "sys_user", self.inner.get_pool())?;
         info!("Updated user.id: {:?}", updated_id);
         Ok(updated_id)
 
         // let id = param.base.id.ok_or_else(|| Error::msg("User id is required for update"))?;
         // let update_result = sqlx
-        //   ::query("UPDATE users SET name = $1, email = $2 WHERE id = $3")
+        //   ::query("UPDATE sys_user SET name = $1, email = $2 WHERE id = $3")
         //   .bind(param.name)
         //   .bind(param.email)
         //   .bind(id)
         //   .execute(self.inner.get_pool()).await
-        //   .unwrap();
+        //   ?;
         // info!("updated result: {:?}", update_result);
         // Ok(update_result.rows_affected() as i64)
     }
 
     async fn delete_all(&self) -> Result<u64, Error> {
-        let delete_result = sqlx::query("DELETE FROM users")
+        let delete_result = sqlx::query("DELETE FROM sys_user")
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())
     }
 
     async fn delete_by_id(&self, id: i64) -> Result<u64, Error> {
-        let delete_result = sqlx::query("DELETE FROM users WHERE id = $1 and del_flag = 0")
+        let delete_result = sqlx::query("DELETE FROM sys_user WHERE id = $1 and del_flag = 0")
             .bind(id)
             .execute(self.inner.get_pool())
-            .await
-            .unwrap();
+            .await?;
 
         info!("Deleted result: {:?}", delete_result);
         Ok(delete_result.rows_affected())

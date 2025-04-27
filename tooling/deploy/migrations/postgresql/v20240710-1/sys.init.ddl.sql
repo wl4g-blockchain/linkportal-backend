@@ -20,7 +20,7 @@
 --
 --
 -- Create the users table.
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT PRIMARY KEY NOT NULL,
     name VARCHAR(64) NULL,
     -- "账号昵称"
@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS users (
     lang VARCHAR(64) NULL,
     status INTEGER NULL default 0,
     create_by VARCHAR(64) NULL,
-    create_time BIGINT DEFAULT (EXTRACT(EPOCH FROM current_timestamp) * 1000)::BIGINT,
+    create_time TIMESTAMPTZ default current_timestamp,
     update_by VARCHAR(64) NULL,
-    update_time BIGINT DEFAULT (EXTRACT(EPOCH FROM current_timestamp) * 1000)::BIGINT,
-    del_flag INTEGER not NULL default 0
+    update_time TIMESTAMPTZ default current_timestamp,
+    del_flag INTEGER NOT NULL default 0,
 );

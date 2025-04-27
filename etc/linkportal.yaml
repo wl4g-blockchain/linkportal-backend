@@ -183,7 +183,7 @@ services:
               - OffRampRemoved
     - kind: "ETHEREUM"
       name: "sepoliaEthTxLogUpdater"
-      enabled: false
+      enabled: true
       cron: "0 5 * * * *"
       channel-size: 100
       chain:

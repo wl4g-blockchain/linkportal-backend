@@ -20,7 +20,7 @@
 --
 --
 -- Create the users table.
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT PRIMARY KEY NOT NULL,
     name VARCHAR(64) NULL,
     -- "账号昵称"
