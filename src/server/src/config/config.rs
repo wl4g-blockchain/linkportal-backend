@@ -540,8 +540,8 @@ pub struct EthereumContractProperties {
     pub address: String, // e.g: ["0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"]
     #[serde(rename = "abi-path")]
     pub abi_path: String, // e.g: '/etc/linkportal/abi/ethereum/uniswapv2factory-on-ethereum-mainnet-20250424.json'
-    #[serde(rename = "event-names")]
-    pub event_names: Vec<String>, // Target listen ethereum event names.
+    #[serde(rename = "events")]
+    pub events: Vec<String>, // Target listen ethereum event names.
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -73,7 +73,7 @@ impl EthereumTxLogUpdater {
                 EthContractSpec {
                     address: c.address.parse().expect("Failed to parse contract address"),
                     abi: abi.to_owned(),
-                    filter_events: c.event_names.to_owned(),
+                    filter_events: c.events.to_owned(),
                 }
             })
             .collect();

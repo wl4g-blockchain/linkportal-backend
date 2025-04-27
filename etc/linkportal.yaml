@@ -160,7 +160,7 @@ services:
   updaters:
     - kind: "ETHEREUM"
       name: "mainnetEthTxLogUpdater"
-      enabled: true
+      enabled: false
       cron: "0 5 * * * *"
       channel-size: 100
       chain:
@@ -172,9 +172,9 @@ services:
           # see:https://docs.chain.link/ccip/directory/mainnet/chain/mainnet
           # see:https://etherscan.io/address/0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D#code
           - address: "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D"
-            # e.g: export LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__CONTRACTS[0]__ABI_PATH="${workspaceFolder}/etc/abi/chainlink/router-v20250424.json"
-            #abi-path: "/etc/linkportal/abi/chainlink/router-v20250424.json"
-            event-names:
+            # e.g: export LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__CONTRACTS[0]__ABI_PATH="${workspaceFolder}/etc/abi/chainlink/v20250424/FunctionRouter.json"
+            #abi-path: "" # e.g: "/etc/linkportal/abi/chainlink/v20250424/FunctionRouter.json"
+            events:
               - Transfer
               - Approval
               - OwnershipTransferRequested
@@ -191,11 +191,40 @@ services:
         http-rpc-url: "https://eth-sepolia.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
         ws-rpc-url: "wss://eth-sepolia.g.alchemy.com/v2/M8QUxbFISVXMqMxvWWKx-N2cxUJF9jmD"
         contracts:
-          - address: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-            # e.g: export LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[0]__ABI_PATH="${workspaceFolder}/etc/abi/linkportal/RealEstateToken-v20250425.json"
-            #abi-path: "/etc/linkportal/abi/linkportal/RealEstateToken-v20250425.json"
-            event-names:
-              - Transfer
+          - address: "0x3cce8028fff80953a475436b0d49b39956cd7073"
+            #abi-path: "" # e.g: "/etc/linkportal/abi/linkportal/v20250425/RealEstateIssuer.json"
+            events:
+              - IssueRequested
+              - IssueApproved
+          - address: "0x9ed445329d8465c2c56497102ec80bfdb8952e8b"
+            #abi-path: "" # e.g: "/etc/linkportal/abi/linkportal/v20250425/RealEstatePriceOracle.json"
+            events:
+              - RequestSent
+              - RequestFulfilled
+          - address: "0xe4c3e9ee1faf31c9cb1750cce5f247e339c42602"
+            #abi-path: "" # e.g: "/etc/linkportal/abi/linkportal/v20250425/RealEstateToken.json"
+            events:
+              - ChainEnabled
+              - ChainDisabled
+              - CrossChainSent
+              - CrossChainReceived
+          - address: ""
+            #abi-path: "" # e.g: "/etc/linkportal/abi/linkportal/v20250425/RealEstateKYC.json"
+            events:
+              - VerifierAdded
+              - UserVerified
+              - VerifierRemoved
+          - address: ""
+            #abi-path: "" # e.g: "/etc/linkportal/abi/linkportal/v20250425/RealEstateLinker.json"
+            events:
+              - Deposited
+              - Redeemed
+              - Liquidated
+              - LendingPoolSet
+              - CollateralDepositedToPool
+              - StablecoinBorrowed
+              - StablecoinRepaid
+              - CollateralWithdrawn
     #- kind: "SOLANA"
     #  name: "mainnetSolTxLogUpdater"
     #  enabled: true

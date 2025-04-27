@@ -43,8 +43,12 @@
                 "RUST_BACKTRACE": "full",
                 "LINKPORTAL_CFG_VERBOSE": "false",
                 "LINKPORTAL_CFG_PATH": "${workspaceFolder}/etc/linkportal.yaml",
-                "LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__CONTRACTS[0]__ABI_PATH": "${workspaceFolder}/etc/abi/chainlink/router-v20250424.json",
-                "LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[0]__ABI_PATH": "${workspaceFolder}/etc/abi/linkportal/RealEstateToken-v20250425.json",
+                "LINKPORTAL__SERVICES__UPDATERS[0]__CHAIN__CONTRACTS[0]__ABI_PATH": "${workspaceFolder}/etc/abi/chainlink/v20250424/FunctionRouter.json",
+                "LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[0]__ABI_PATH": "${workspaceFolder}/etc/abi/linkportal/v20250425/RealEstateIssuer.json",
+                "LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[1]__ABI_PATH": "${workspaceFolder}/etc/abi/linkportal/v20250425/RealEstateToken.json",
+                "LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[2]__ABI_PATH": "${workspaceFolder}/etc/abi/linkportal/v20250425/RealEstatePriceOracle.json",
+                "LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[3]__ABI_PATH": "${workspaceFolder}/etc/abi/linkportal/v20250425/RealEstateKYC.json",
+                "LINKPORTAL__SERVICES__UPDATERS[1]__CHAIN__CONTRACTS[4]__ABI_PATH": "${workspaceFolder}/etc/abi/linkportal/v20250425/RealEstateLinker.json",
             },
             "args": [
                 "standalone" // server|updater
